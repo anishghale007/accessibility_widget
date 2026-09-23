@@ -14,14 +14,14 @@ import 'reading_guide_overlay.dart';
 /// and an optional floating action button to open accessibility preferences.
 class AccessibilityWidget extends StatefulWidget {
   const AccessibilityWidget({
-    super.key,
     required this.child,
-    this.controller,
-    this.theme,
-    this.showToggleButton = true,
-    this.fabIcon,
     this.fabAlignment = Alignment.bottomRight,
     this.fabMargin = const EdgeInsets.all(16.0),
+    this.showFloatingActionButton = true,
+    this.controller,
+    this.theme,
+    this.fabIcon,
+    super.key,
   });
 
   /// The child application widget tree.
@@ -34,7 +34,7 @@ class AccessibilityWidget extends StatefulWidget {
   final AccessibilityWidgetTheme? theme;
 
   /// Whether to display the floating accessibility preferences button.
-  final bool showToggleButton;
+  final bool showFloatingActionButton;
 
   /// Optional icon for the floating button. Overrides theme default if specified.
   final IconData? fabIcon;
@@ -251,7 +251,7 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
           );
 
           // 5. Floating Action Button Entry Point
-          if (widget.showToggleButton) {
+          if (widget.showFloatingActionButton) {
             final IconData effectiveFabIcon =
                 widget.fabIcon ?? resolvedTheme.fabIcon;
 
