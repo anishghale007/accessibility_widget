@@ -1,0 +1,36 @@
+name: accessibility_widget
+description: A non-invasive Flutter accessibility preferences widget offering WCAG-informed controls, reading guide, high contrast, text scaling, preset profiles, and more.
+version: 0.0.1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+platforms:
+  android:
+  ios:
+  web:
+
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Andika
+      fonts:
+        - asset: lib/fonts/Andika-Regular.ttf
+        - asset: lib/fonts/Andika-Bold.ttf
+          weight: 700
+        - asset: lib/fonts/Andika-Italic.ttf
+          style: italic
+        - asset: lib/fonts/Andika-BoldItalic.ttf
+          weight: 700
+          style: italic
