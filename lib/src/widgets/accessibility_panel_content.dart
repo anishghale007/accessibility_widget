@@ -193,8 +193,12 @@ class AccessibilityPanelContent extends StatelessWidget {
         const SizedBox(height: 16),
 
         // 6. Motion Section
-        _buildSectionHeader(context, theme, 'Motion & Animations',
-            Icons.motion_photos_off_outlined),
+        _buildSectionHeader(
+          context,
+          theme,
+          'Motion & Animations',
+          Icons.motion_photos_off_outlined,
+        ),
         _buildSwitchTile(
           context: context,
           theme: theme,
@@ -205,18 +209,25 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        // 7. Feedback Section
-        _buildSectionHeader(
-            context, theme, 'Feedback', Icons.vibration_outlined),
-        _buildSwitchTile(
-          context: context,
-          theme: theme,
-          title: 'Haptic Feedback',
-          subtitle: 'Provides physical vibration confirmation on tap (mobile)',
-          value: settings.hapticFeedback,
-          onChanged: (_) => controller.toggleHapticFeedback(),
-        ),
-        const SizedBox(height: 24),
+        // 7. Feedback Section (Mobile only)
+        if (!platform.isWeb) ...<Widget>[
+          _buildSectionHeader(
+            context,
+            theme,
+            'Feedback',
+            Icons.vibration_outlined,
+          ),
+          _buildSwitchTile(
+            context: context,
+            theme: theme,
+            title: 'Haptic Feedback',
+            subtitle:
+                'Provides physical vibration confirmation on tap (mobile)',
+            value: settings.hapticFeedback,
+            onChanged: (_) => controller.toggleHapticFeedback(),
+          ),
+          const SizedBox(height: 16),
+        ],
 
         // 8. Reset Button (Conditionally rendered when not docked stickily)
         if (showResetButton) ...<Widget>[
@@ -283,10 +294,10 @@ class AccessibilityPanelContent extends StatelessWidget {
                 title: AccessibilityProfile.visionImpaired.label,
                 description: AccessibilityProfile.visionImpaired.description,
                 icon: Icons.visibility_outlined,
-                isSelected:
-                    settings.activeProfile == AccessibilityProfile.visionImpaired,
-                onTap: () =>
-                    controller.applyProfile(AccessibilityProfile.visionImpaired),
+                isSelected: settings.activeProfile ==
+                    AccessibilityProfile.visionImpaired,
+                onTap: () => controller
+                    .applyProfile(AccessibilityProfile.visionImpaired),
                 theme: theme,
               ),
             ),
@@ -301,10 +312,8 @@ class AccessibilityPanelContent extends StatelessWidget {
                 title: AccessibilityProfile.adhd.label,
                 description: AccessibilityProfile.adhd.description,
                 icon: Icons.center_focus_strong_outlined,
-                isSelected:
-                    settings.activeProfile == AccessibilityProfile.adhd,
-                onTap: () =>
-                    controller.applyProfile(AccessibilityProfile.adhd),
+                isSelected: settings.activeProfile == AccessibilityProfile.adhd,
+                onTap: () => controller.applyProfile(AccessibilityProfile.adhd),
                 theme: theme,
               ),
             ),

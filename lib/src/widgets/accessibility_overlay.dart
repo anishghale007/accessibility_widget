@@ -208,7 +208,6 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
 
           if (settings.bigCursor) {
             content = BigCursorOverlay(
-              cursorColor: resolvedTheme.accentColor,
               child: content,
             );
           }

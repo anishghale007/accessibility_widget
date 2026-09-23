@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import '../utils/platform.dart';
 
 /// Web-only overlay that replaces the default browser cursor with an enlarged, high-visibility cursor follower.
+///
+/// Features a crisp white background with a prominent, high-contrast black border for maximum visibility.
 class BigCursorOverlay extends StatefulWidget {
   const BigCursorOverlay({
     super.key,
     required this.child,
     this.platform = PlatformInfo.current,
-    this.cursorSize = 36.0,
-    this.cursorColor,
+    this.cursorSize = 38.0,
+    this.cursorColor = Colors.white,
+    this.strokeColor = Colors.black,
   });
 
   /// The child widget tree.
@@ -20,8 +23,11 @@ class BigCursorOverlay extends StatefulWidget {
   /// Size of the enlarged cursor icon.
   final double cursorSize;
 
-  /// Color of the enlarged cursor icon.
-  final Color? cursorColor;
+  /// Fill color of the enlarged cursor (defaults to crisp white).
+  final Color cursorColor;
+
+  /// Outline border color of the enlarged cursor (defaults to bold black).
+  final Color strokeColor;
 
   @override
   State<BigCursorOverlay> createState() => _BigCursorOverlayState();
@@ -50,9 +56,6 @@ class _BigCursorOverlayState extends State<BigCursorOverlay> {
       return widget.child;
     }
 
-    final ThemeData theme = Theme.of(context);
-    final Color effectiveColor = widget.cursorColor ?? theme.colorScheme.primary;
-
     return MouseRegion(
       cursor: SystemMouseCursors.none,
       onHover: _onHover,
@@ -68,8 +71,8 @@ class _BigCursorOverlayState extends State<BigCursorOverlay> {
                 child: CustomPaint(
                   size: Size(widget.cursorSize, widget.cursorSize),
                   painter: _EnlargedCursorPainter(
-                    color: effectiveColor,
-                    strokeColor: Colors.white,
+                    color: widget.cursorColor,
+                    strokeColor: widget.strokeColor,
                   ),
                 ),
               ),
@@ -92,27 +95,28 @@ class _EnlargedCursorPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Path path = Path();
-    // Draw classic pointer arrow
+    // Crisp, classic high-contrast cursor arrow geometry
     path.moveTo(0, 0);
-    path.lineTo(size.width * 0.75, size.height * 0.65);
-    path.lineTo(size.width * 0.45, size.height * 0.65);
-    path.lineTo(size.width * 0.65, size.height * 0.95);
-    path.lineTo(size.width * 0.45, size.height * 1.05);
-    path.lineTo(size.width * 0.25, size.height * 0.75);
-    path.lineTo(0, size.height * 0.95);
+    path.lineTo(0, size.height * 0.88);
+    path.lineTo(size.width * 0.25, size.height * 0.65);
+    path.lineTo(size.width * 0.50, size.height * 1.05);
+    path.lineTo(size.width * 0.68, size.height * 0.95);
+    path.lineTo(size.width * 0.43, size.height * 0.55);
+    path.lineTo(size.width * 0.76, size.height * 0.55);
     path.close();
 
-    // Fill
+    // Fill with white background
     final Paint fillPaint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
     canvas.drawPath(path, fillPaint);
 
-    // High contrast white outline
+    // High contrast black border
     final Paint strokePaint = Paint()
       ..color = strokeColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
+      ..strokeWidth = 2.8
+      ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
     canvas.drawPath(path, strokePaint);
   }
