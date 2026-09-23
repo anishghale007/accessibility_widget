@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../utils/platform.dart';
 
@@ -53,7 +54,7 @@ class _ReadingGuideOverlayState extends State<ReadingGuideOverlay> {
     final Color effectiveAccentColor =
         widget.guideColor ?? theme.colorScheme.primary;
     final Color maskColor =
-        widget.overlayColor ?? Colors.black.withValues(alpha: 0.55);
+        widget.overlayColor ?? Colors.black.withValues(alpha: 0.8);
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -94,36 +95,28 @@ class _ReadingGuideOverlayState extends State<ReadingGuideOverlay> {
             ),
 
             // Reading Spotlight Band Outline & Draggable Grip Handle
-            AnimatedPositioned(
-              duration: _isDragging
-                  ? Duration.zero
-                  : const Duration(milliseconds: 150),
-              curve: Curves.easeOut,
-              top: currentY,
-              left: 0,
-              right: 0,
-              height: widget.guideHeight,
-              child: Stack(
-                children: <Widget>[
-                  // Visual guideline borders (top & bottom)
-                  IgnorePointer(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                            color: effectiveAccentColor.withValues(alpha: 0.8),
-                            width: 1.5,
-                          ),
-                          bottom: BorderSide(
-                            color: effectiveAccentColor.withValues(alpha: 0.8),
-                            width: 1.5,
-                          ),
+            Stack(
+              children: <Widget>[
+                // Visual guideline borders (top & bottom)
+                IgnorePointer(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: effectiveAccentColor.withValues(alpha: 0.8),
+                          width: 1.5,
+                        ),
+                        bottom: BorderSide(
+                          color: effectiveAccentColor.withValues(alpha: 0.8),
+                          width: 1.5,
                         ),
                       ),
                     ),
                   ),
+                ),
 
-                  // Compact, elegant draggable grip handle on the right edge
+                // Compact, elegant draggable grip handle on the right edge
+                if (!kIsWeb)
                   Align(
                     alignment: Alignment.centerRight,
                     child: Padding(
@@ -181,8 +174,7 @@ class _ReadingGuideOverlayState extends State<ReadingGuideOverlay> {
                       ),
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
           ],
         );

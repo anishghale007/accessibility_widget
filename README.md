@@ -2,6 +2,8 @@
 
 A comprehensive, non-invasive Flutter accessibility package providing WCAG 2.1-informed controls, preset profiles, dynamic typography scaling, high contrast, reading guide spotlight, and platform-adaptive preferences UI.
 
+🌐 [Check out the web demo](https://anishghale007.github.io/accessibility_widget/)
+
 This package implements accessibility features informed by the [WCAG 2.1 AA Guidelines](https://www.w3.org/TR/WCAG21/), focusing on:
 
 - [1.4.3 Contrast (Minimum)](https://www.w3.org/TR/WCAG21/#contrast-minimum)
