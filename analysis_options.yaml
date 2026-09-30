@@ -4,3 +4,5 @@ linter:
   rules:
     public_member_api_docs: false
     sort_pub_dependencies: false
+    sort_constructors_first: true
+    use_super_parameters: true

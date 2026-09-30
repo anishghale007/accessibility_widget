@@ -4,6 +4,44 @@ import 'accessibility_profile.dart';
 /// Immutable configuration representation of all user-selected accessibility preferences.
 @immutable
 class AccessibilitySettings {
+  /// Deserializes an instance from a JSON map with safe fallback defaults.
+  factory AccessibilitySettings.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return defaults;
+    }
+
+    AccessibilityProfile? profile;
+    final dynamic rawProfile = json['activeProfile'];
+    if (rawProfile is String) {
+      for (final AccessibilityProfile p in AccessibilityProfile.values) {
+        if (p.name == rawProfile) {
+          profile = p;
+          break;
+        }
+      }
+    }
+
+    return AccessibilitySettings(
+      textScale: (json['textScale'] as num?)?.toDouble() ?? 1.0,
+      boldText: json['boldText'] as bool? ?? false,
+      dyslexiaFont: json['dyslexiaFont'] as bool? ?? false,
+      lineSpacing: (json['lineSpacing'] as num?)?.toDouble() ?? 1.0,
+      letterSpacing: (json['letterSpacing'] as num?)?.toDouble() ?? 0.0,
+      highContrast: json['highContrast'] as bool? ?? false,
+      invertColors: json['invertColors'] as bool? ?? false,
+      saturation: (json['saturation'] as num?)?.toDouble() ?? 1.0,
+      darkMode: json['darkMode'] as bool?,
+      hideImages: json['hideImages'] as bool? ?? false,
+      highlightLinks: json['highlightLinks'] as bool? ?? false,
+      highlightTiles: json['highlightTiles'] as bool? ?? false,
+      highlightHeadings: json['highlightHeadings'] as bool? ?? false,
+      readingGuide: json['readingGuide'] as bool? ?? false,
+      bigCursor: json['bigCursor'] as bool? ?? false,
+      stopAnimations: json['stopAnimations'] as bool? ?? false,
+      hapticFeedback: json['hapticFeedback'] as bool? ?? false,
+      activeProfile: profile,
+    );
+  }
   const AccessibilitySettings({
     this.textScale = 1.0,
     this.boldText = false,
@@ -123,7 +161,8 @@ class AccessibilitySettings {
       bigCursor: bigCursor ?? this.bigCursor,
       stopAnimations: stopAnimations ?? this.stopAnimations,
       hapticFeedback: hapticFeedback ?? this.hapticFeedback,
-      activeProfile: clearActiveProfile ? null : (activeProfile ?? this.activeProfile),
+      activeProfile:
+          clearActiveProfile ? null : (activeProfile ?? this.activeProfile),
     );
   }
 
@@ -149,45 +188,6 @@ class AccessibilitySettings {
       'hapticFeedback': hapticFeedback,
       'activeProfile': activeProfile?.name,
     };
-  }
-
-  /// Deserializes an instance from a JSON map with safe fallback defaults.
-  factory AccessibilitySettings.fromJson(Map<String, dynamic>? json) {
-    if (json == null) {
-      return defaults;
-    }
-
-    AccessibilityProfile? profile;
-    final dynamic rawProfile = json['activeProfile'];
-    if (rawProfile is String) {
-      for (final AccessibilityProfile p in AccessibilityProfile.values) {
-        if (p.name == rawProfile) {
-          profile = p;
-          break;
-        }
-      }
-    }
-
-    return AccessibilitySettings(
-      textScale: (json['textScale'] as num?)?.toDouble() ?? 1.0,
-      boldText: json['boldText'] as bool? ?? false,
-      dyslexiaFont: json['dyslexiaFont'] as bool? ?? false,
-      lineSpacing: (json['lineSpacing'] as num?)?.toDouble() ?? 1.0,
-      letterSpacing: (json['letterSpacing'] as num?)?.toDouble() ?? 0.0,
-      highContrast: json['highContrast'] as bool? ?? false,
-      invertColors: json['invertColors'] as bool? ?? false,
-      saturation: (json['saturation'] as num?)?.toDouble() ?? 1.0,
-      darkMode: json['darkMode'] as bool?,
-      hideImages: json['hideImages'] as bool? ?? false,
-      highlightLinks: json['highlightLinks'] as bool? ?? false,
-      highlightTiles: json['highlightTiles'] as bool? ?? false,
-      highlightHeadings: json['highlightHeadings'] as bool? ?? false,
-      readingGuide: json['readingGuide'] as bool? ?? false,
-      bigCursor: json['bigCursor'] as bool? ?? false,
-      stopAnimations: json['stopAnimations'] as bool? ?? false,
-      hapticFeedback: json['hapticFeedback'] as bool? ?? false,
-      activeProfile: profile,
-    );
   }
 
   @override

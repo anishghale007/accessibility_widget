@@ -44,7 +44,12 @@ void main() {
       );
 
       expect(find.text('Web Cursor View'), findsOneWidget);
-      final MouseRegion mouseRegion = tester.widget<MouseRegion>(find.byType(MouseRegion));
+      final MouseRegion mouseRegion = tester.widget<MouseRegion>(
+        find.descendant(
+          of: find.byType(BigCursorOverlay),
+          matching: find.byType(MouseRegion),
+        ).first,
+      );
       expect(mouseRegion.cursor, SystemMouseCursors.none);
     });
   });

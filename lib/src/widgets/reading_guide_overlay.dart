@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../utils/platform.dart';
 
@@ -9,12 +8,12 @@ import '../utils/platform.dart';
 /// up and down to track their reading position smoothly.
 class ReadingGuideOverlay extends StatefulWidget {
   const ReadingGuideOverlay({
-    super.key,
     required this.child,
     this.platform = PlatformInfo.current,
     this.guideHeight = 72.0,
     this.guideColor,
     this.overlayColor,
+    super.key,
   });
 
   /// The underlying app widget tree.
@@ -116,7 +115,7 @@ class _ReadingGuideOverlayState extends State<ReadingGuideOverlay> {
                 ),
 
                 // Compact, elegant draggable grip handle on the right edge
-                if (!kIsWeb)
+                if (!widget.platform.isWeb)
                   Align(
                     alignment: Alignment.centerRight,
                     child: Padding(

@@ -9,12 +9,12 @@ import 'accessibility_scope.dart';
 /// Supports optional tactile haptic feedback when tapped if `onTap` is provided.
 class AccessibleLink extends StatelessWidget {
   const AccessibleLink({
-    super.key,
     required this.child,
-    this.onTap,
     this.highlightColor,
     this.showIcon = true,
     this.icon = Icons.open_in_new,
+    this.onTap,
+    super.key,
   });
 
   /// The wrapped widget (e.g. [Text], [InkWell], or custom link component).
@@ -55,35 +55,48 @@ class AccessibleLink extends StatelessWidget {
       return child;
     }
 
-    final ThemeData theme = Theme.of(context);
     final AccessibilityWidgetTheme? widgetTheme = scope?.theme;
-    final Color effectiveColor = highlightColor ??
-        widgetTheme?.accentColor ??
-        theme.colorScheme.primary;
 
-    Widget content = DefaultTextStyle.merge(
-      style: TextStyle(
-        color: effectiveColor,
-        decoration: TextDecoration.underline,
-        decorationColor: effectiveColor,
-        decorationThickness: 2.0,
-        fontWeight: FontWeight.w600,
+    // WCAG-compliant bright highlighter yellow for maximum visibility & contrast
+    final Color effectiveHighlightBg =
+        highlightColor ?? widgetTheme?.accentColor ?? const Color(0xFFFFEB3B);
+
+    const Color textColor = Colors.black;
+
+    Widget content = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.5),
+      decoration: BoxDecoration(
+        color: effectiveHighlightBg,
+        borderRadius: BorderRadius.circular(4.0),
+        border: Border.all(
+          color: Colors.black,
+          width: 1.5,
+        ),
       ),
-      child: showIcon
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Flexible(child: child),
-                const SizedBox(width: 4),
-                Icon(
-                  icon,
-                  size: 14,
-                  color: effectiveColor,
-                ),
-              ],
-            )
-          : child,
+      child: DefaultTextStyle.merge(
+        style: const TextStyle(
+          color: textColor,
+          decoration: TextDecoration.underline,
+          decorationColor: textColor,
+          decorationThickness: 2.0,
+          fontWeight: FontWeight.bold,
+        ),
+        child: showIcon
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Flexible(child: child),
+                  const SizedBox(width: 4),
+                  Icon(
+                    icon,
+                    size: 14,
+                    color: textColor,
+                  ),
+                ],
+              )
+            : child,
+      ),
     );
 
     if (onTap != null) {

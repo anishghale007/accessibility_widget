@@ -11,15 +11,19 @@ void main() {
       controller.toggleHapticFeedback();
 
       await tester.pumpWidget(
-        AccessibilityScope(
-          controller: controller,
-          child: Builder(
-            builder: (BuildContext context) {
-              return ElevatedButton(
-                onPressed: () => AccessibilityHaptics.maybeVibrate(context),
-                child: const Text('Vibrate Button'),
-              );
-            },
+        MaterialApp(
+          home: AccessibilityScope(
+            controller: controller,
+            child: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    onPressed: () => AccessibilityHaptics.maybeVibrate(context),
+                    child: const Text('Vibrate Button'),
+                  );
+                },
+              ),
+            ),
           ),
         ),
       );

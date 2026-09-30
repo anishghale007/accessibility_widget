@@ -25,13 +25,13 @@ void main() {
       );
 
       expect(find.text('Underlying Reading Content'), findsOneWidget);
-      expect(find.byIcon(Icons.drag_handle), findsOneWidget);
+      expect(find.byIcon(Icons.unfold_more_rounded), findsOneWidget);
 
       // Drag the handle vertically
-      await tester.drag(find.byIcon(Icons.drag_handle), const Offset(0, 50));
+      await tester.drag(find.byIcon(Icons.unfold_more_rounded), const Offset(0, 50));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.drag_handle), findsOneWidget);
+      expect(find.byIcon(Icons.unfold_more_rounded), findsOneWidget);
     });
 
     testWidgets('does not render mobile drag handle on web platform', (WidgetTester tester) async {
@@ -55,7 +55,7 @@ void main() {
       );
 
       expect(find.text('Web Reading Content'), findsOneWidget);
-      expect(find.byIcon(Icons.drag_handle), findsNothing);
+      expect(find.byIcon(Icons.unfold_more_rounded), findsNothing);
     });
   });
 }
