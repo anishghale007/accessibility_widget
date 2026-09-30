@@ -1,6 +1,9 @@
 name: accessibility_widget
 description: A non-invasive Flutter accessibility preferences widget offering WCAG-informed controls, reading guide, high contrast, text scaling, preset profiles, and more.
 version: 0.0.1
+homepage: https://anishghale007.github.io/accessibility_widget/
+repository: https://github.com/anishghale007/accessibility_widget
+issue_tracker: https://github.com/anishghale007/accessibility_widget/issues
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
