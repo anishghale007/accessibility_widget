@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controller/accessibility_controller.dart';
-import '../theme/accessibility_widget_theme.dart';
+import '../models/accessibility_settings.dart';
 import 'accessibility_panel_content.dart';
 import 'accessibility_scope.dart';
 
@@ -14,53 +14,109 @@ import 'accessibility_scope.dart';
 /// );
 /// ```
 class AccessibilitySettingsPage extends StatelessWidget {
-  const AccessibilitySettingsPage({
-    super.key,
-    this.controller,
-    this.theme,
-  });
-
-  /// Optional controller instance if opened outside an ancestor [AccessibilityScope].
-  final AccessibilityController? controller;
-
-  /// Optional theme instance if opened outside an ancestor [AccessibilityScope].
-  final AccessibilityWidgetTheme? theme;
+  const AccessibilitySettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final AccessibilityScope? ancestorScope =
         AccessibilityScope.maybeOf(context);
-    final AccessibilityController effectiveController =
-        controller ?? ancestorScope?.controller ?? AccessibilityController();
-    final AccessibilityWidgetTheme? effectiveTheme =
-        theme ?? ancestorScope?.theme;
+
+    Widget buildPage(AccessibilityScope scope, BuildContext pageContext) {
+      final AccessibilitySettings settings = scope.settings;
+      final ThemeData ambientTheme = Theme.of(pageContext);
+      final MediaQueryData ambientMedia = MediaQuery.maybeOf(pageContext) ??
+          MediaQueryData.fromView(View.of(pageContext));
+
+      final Brightness effectiveBrightness = settings.darkMode != null
+          ? (settings.darkMode! ? Brightness.dark : Brightness.light)
+          : ambientMedia.platformBrightness;
+
+      final bool isDark = effectiveBrightness == Brightness.dark;
+
+      final ThemeData baselineTheme = (isDark
+              ? ThemeData.dark(useMaterial3: ambientTheme.useMaterial3)
+              : ThemeData.light(useMaterial3: ambientTheme.useMaterial3))
+          .copyWith(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: ambientTheme.colorScheme.primary,
+          brightness: effectiveBrightness,
+        ),
+      );
+
+      ColorScheme effectiveColorScheme = baselineTheme.colorScheme;
+      if (settings.highContrast) {
+        effectiveColorScheme = isDark
+            ? ColorScheme.highContrastDark().copyWith(
+                primary: const Color(0xFFFFD600),
+                onPrimary: Colors.black,
+                secondary: const Color(0xFF00E5FF),
+                onSecondary: Colors.black,
+                surface: Colors.black,
+                onSurface: Colors.white,
+                outline: Colors.white,
+              )
+            : ColorScheme.highContrastLight().copyWith(
+                primary: const Color(0xFF002B7F),
+                onPrimary: Colors.white,
+                secondary: const Color(0xFF004D40),
+                onSecondary: Colors.white,
+                surface: Colors.white,
+                onSurface: Colors.black,
+                outline: Colors.black,
+              );
+      } else if (settings.darkMode == null &&
+          ambientTheme.brightness == effectiveBrightness) {
+        effectiveColorScheme = ambientTheme.colorScheme;
+      }
+
+      final TextTheme baseTextTheme = (settings.darkMode != null &&
+              settings.darkMode != (ambientTheme.brightness == Brightness.dark))
+          ? baselineTheme.textTheme
+          : ambientTheme.textTheme;
+
+      final ThemeData pageTheme = ambientTheme.copyWith(
+        brightness: effectiveBrightness,
+        colorScheme: effectiveColorScheme,
+        textTheme: baseTextTheme,
+        scaffoldBackgroundColor:
+            isDark ? const Color(0xFF121212) : const Color(0xFFFAFAFA),
+      );
+
+      return Theme(
+        data: pageTheme,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Accessibility'),
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.restore),
+                tooltip: 'Reset to defaults',
+                onPressed: () => scope.controller.reset(),
+              ),
+            ],
+          ),
+          body: const SafeArea(
+            child: AccessibilityPanelContent(),
+          ),
+        ),
+      );
+    }
+
+    if (ancestorScope != null) {
+      return buildPage(ancestorScope, context);
+    }
+
+    // Fallback if pushed without an ancestor AccessibilityScope
+    final AccessibilityController fallbackController =
+        AccessibilityController();
+    fallbackController.restore();
 
     return AccessibilityScope(
-      controller: effectiveController,
-      theme: effectiveTheme,
+      controller: fallbackController,
       child: Builder(
         builder: (BuildContext scopedContext) {
           final AccessibilityScope scope = AccessibilityScope.of(scopedContext);
-          final AccessibilityWidgetTheme resolvedTheme =
-              scope.theme?.resolveWith(scopedContext) ??
-                  const AccessibilityWidgetTheme().resolveWith(scopedContext);
-
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Accessibility'),
-              actions: <Widget>[
-                IconButton(
-                  icon: const Icon(Icons.restore),
-                  tooltip: 'Reset to defaults',
-                  onPressed: () => scope.controller.reset(),
-                ),
-              ],
-            ),
-            backgroundColor: resolvedTheme.panelBackgroundColor,
-            body: const SafeArea(
-              child: AccessibilityPanelContent(),
-            ),
-          );
+          return buildPage(scope, scopedContext);
         },
       ),
     );

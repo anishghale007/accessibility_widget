@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/accessibility_widget_theme.dart';
 import '../utils/accessibility_haptics.dart';
 import 'accessibility_scope.dart';
 
@@ -24,7 +23,7 @@ class AccessibleLink extends StatelessWidget {
   /// conditional haptic feedback before calling [onTap].
   final VoidCallback? onTap;
 
-  /// Custom highlight color. Defaults to theme accent color or primary color.
+  /// Custom highlight color. Defaults to WCAG yellow highlighter (#FFEB3B).
   final Color? highlightColor;
 
   /// Whether to append a small link icon when highlighted.
@@ -55,11 +54,8 @@ class AccessibleLink extends StatelessWidget {
       return child;
     }
 
-    final AccessibilityWidgetTheme? widgetTheme = scope?.theme;
-
     // WCAG-compliant bright highlighter yellow for maximum visibility & contrast
-    final Color effectiveHighlightBg =
-        highlightColor ?? widgetTheme?.accentColor ?? const Color(0xFFFFEB3B);
+    final Color effectiveHighlightBg = highlightColor ?? const Color(0xFFFFEB3B);
 
     const Color textColor = Colors.black;
 

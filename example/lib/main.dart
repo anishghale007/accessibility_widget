@@ -111,6 +111,9 @@ class _AccessibilityShowcaseScreenState
           ),
         ],
       ),
+
+      // Default Floating Action Button placed directly in Scaffold.floatingActionButton:
+      floatingActionButton: const AccessibilityFloatingActionButton(),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         children: <Widget>[
@@ -122,8 +125,9 @@ class _AccessibilityShowcaseScreenState
           AccessibleTile(
             child: Card(
               elevation: 0,
-              color: theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.5,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -162,17 +166,24 @@ class _AccessibilityShowcaseScreenState
                         }
                         return ChoiceChip(
                           avatar: Icon(icon, size: 18),
-                          label: Text(profile.label),
+                          label: Text(
+                            profile.label,
+                            style: TextStyle(
+                              color: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          ),
                           selected: isSelected,
                           onSelected: (_) {
                             final bool wasSelected = isSelected;
                             controller.applyProfile(profile);
                             if (wasSelected) {
                               _showMessage(
-                                  'Disabled "${profile.label}" profile');
+                                'Disabled "${profile.label}" profile',
+                              );
                             } else {
                               _showMessage(
-                                  'Applied "${profile.label}" profile');
+                                'Applied "${profile.label}" profile',
+                              );
                             }
                           },
                         );
@@ -189,8 +200,9 @@ class _AccessibilityShowcaseScreenState
           AccessibleTile(
             child: Card(
               elevation: 0,
-              color: theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -226,8 +238,9 @@ class _AccessibilityShowcaseScreenState
           AccessibleTile(
             child: Card(
               elevation: 0,
-              color: theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -297,8 +310,9 @@ class _AccessibilityShowcaseScreenState
           AccessibleTile(
             child: Card(
               elevation: 0,
-              color: theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -317,15 +331,17 @@ class _AccessibilityShowcaseScreenState
                     AccessibleLink(
                       onTap: () =>
                           _showMessage('Tapped: WCAG 2.1 Guidelines Link'),
-                      child:
-                          const Text('Read WCAG 2.1 Accessibility Guidelines'),
+                      child: const Text(
+                        'Read WCAG 2.1 Accessibility Guidelines',
+                      ),
                     ),
                     const SizedBox(height: 8),
                     AccessibleLink(
                       onTap: () =>
                           _showMessage('Tapped: Accessibility Statement'),
                       child: const Text(
-                          'View App Accessibility Statement & Policy'),
+                        'View App Accessibility Statement & Policy',
+                      ),
                     ),
                   ],
                 ),
@@ -338,8 +354,9 @@ class _AccessibilityShowcaseScreenState
           AccessibleTile(
             child: Card(
               elevation: 0,
-              color: theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -462,7 +479,8 @@ class _AccessibilityShowcaseScreenState
     if (settings.boldText) activeFeatures.add('Bold Text');
     if (settings.stopAnimations) activeFeatures.add('Reduced Motion');
 
-    final String profileLabel = settings.activeProfile?.label ??
+    final String profileLabel =
+        settings.activeProfile?.label ??
         (activeFeatures.isEmpty ? 'Default (Standard)' : 'Custom Settings');
 
     return Container(
@@ -513,10 +531,7 @@ class _AccessibilityShowcaseScreenState
               runSpacing: 6,
               children: activeFeatures.map((feature) {
                 return Chip(
-                  label: Text(
-                    feature,
-                    style: theme.textTheme.labelSmall,
-                  ),
+                  label: Text(feature, style: theme.textTheme.labelSmall),
                   padding: EdgeInsets.zero,
                   visualDensity: VisualDensity.compact,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

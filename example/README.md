@@ -6,7 +6,7 @@ A complete showcase application demonstrating all features provided by the [`acc
 
 ## Basic Implementation
 
-Wrap your home screen or application tree with `AccessibilityWidget`:
+Wrap your home screen or application tree with `AccessibilityWidget`. The widget will automatically use the theme defined in your `MaterialApp`.
 
 ```dart
 import 'package:flutter/material.dart';
@@ -52,6 +52,10 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Accessible App Home'),
       ),
+      // Manually place the FAB to open the accessibility preferences sheet
+      floatingActionButton: const AccessibilityFloatingActionButton(
+        icon: Icons.accessibility_new,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -68,7 +72,20 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 16),
             AccessibleLink(
               onTap: () => AccessibilityBottomSheet.show(context),
-              child: const Text('Open Accessibility Preferences'),
+              child: const Text('Open Accessibility Preferences Sheet'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AccessibilitySettingsPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.settings),
+              label: const Text('Open Full Settings Page'),
             ),
           ],
         ),
@@ -80,11 +97,26 @@ class HomeScreen extends StatelessWidget {
 
 ---
 
+## Customizing the Floating Action Button
+
+You can customize the FAB appearance:
+
+```dart
+AccessibilityFloatingActionButton(
+  icon: Icons.accessibility, // Custom icon (defaults to Icons.accessibility_new)
+  backgroundColor: Colors.indigo,
+  foregroundColor: Colors.white,
+  tooltip: 'Accessibility preferences',
+)
+```
+
+---
+
 ## Features Demonstrated
 
 - ⚡ **Preset Profiles** — Live toggling between **Seizure Safe**, **Vision Impaired**, **ADHD Friendly**, and **Dyslexia Friendly** profiles.
 - 🔤 **Typography & Headings** — Testing font scaling, line height, letter spacing, bold text, and the bundled **Andika** dyslexia-friendly font alongside `AccessibleHeading` (levels 1–3).
-- 🖼️ **Image Hiding** — Demonstrating `AccessibleImage` with instant zero-space placeholder removal.
+- 🖼️ **Image Hiding** — Demonstrating `AccessibleImage` with accessible placeholder replacement.
 - 🔗 **Links & Haptics** — Demonstrating `AccessibleLink` with visual highlights and tactile feedback.
 - 🃏 **Cards & Boundaries** — Testing `AccessibleTile` border outlines.
 - ⏱️ **Motion Reduction** — Rotation animation demonstrating instant pausing via `MediaQuery.disableAnimations`.

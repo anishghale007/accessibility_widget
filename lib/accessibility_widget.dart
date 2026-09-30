@@ -8,11 +8,9 @@ export 'src/controller/stores/accessibility_store.dart';
 export 'src/controller/stores/in_memory_accessibility_store.dart';
 export 'src/controller/stores/shared_preferences_accessibility_store.dart';
 
-// Theming
-export 'src/theme/accessibility_widget_theme.dart';
-
 // Widgets & Wrappers
 export 'src/widgets/accessibility_bottom_sheet.dart';
+export 'src/widgets/accessibility_floating_action_button.dart';
 export 'src/widgets/accessibility_overlay.dart';
 export 'src/widgets/accessibility_panel_content.dart';
 export 'src/widgets/accessibility_scope.dart';

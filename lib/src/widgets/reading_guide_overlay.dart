@@ -94,86 +94,94 @@ class _ReadingGuideOverlayState extends State<ReadingGuideOverlay> {
             ),
 
             // Reading Spotlight Band Outline & Draggable Grip Handle
-            Stack(
-              children: <Widget>[
-                // Visual guideline borders (top & bottom)
-                IgnorePointer(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(
-                          color: effectiveAccentColor.withValues(alpha: 0.8),
-                          width: 1.5,
-                        ),
-                        bottom: BorderSide(
-                          color: effectiveAccentColor.withValues(alpha: 0.8),
-                          width: 1.5,
+            Positioned(
+              top: currentY,
+              left: 0,
+              right: 0,
+              height: widget.guideHeight,
+              child: Stack(
+                children: <Widget>[
+                  // Visual guideline borders (top & bottom)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              color: effectiveAccentColor.withValues(alpha: 0.8),
+                              width: 1.5,
+                            ),
+                            bottom: BorderSide(
+                              color: effectiveAccentColor.withValues(alpha: 0.8),
+                              width: 1.5,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
 
-                // Compact, elegant draggable grip handle on the right edge
-                if (!widget.platform.isWeb)
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 6.0),
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onVerticalDragStart: (_) {
-                          setState(() => _isDragging = true);
-                        },
-                        onVerticalDragUpdate: (DragUpdateDetails details) {
-                          setState(() {
-                            _guideY = ((_guideY ?? currentY) + details.delta.dy)
-                                .clamp(0.0, maxGuideY);
-                          });
-                        },
-                        onVerticalDragEnd: (_) {
-                          setState(() => _isDragging = false);
-                        },
-                        onVerticalDragCancel: () {
-                          setState(() => _isDragging = false);
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          width: 24,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: effectiveAccentColor,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: <BoxShadow>[
-                              BoxShadow(
-                                color: effectiveAccentColor.withValues(
-                                  alpha: 0.35,
+                  // Compact, elegant draggable grip handle on the right edge
+                  if (!widget.platform.isWeb)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 6.0),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onVerticalDragStart: (_) {
+                            setState(() => _isDragging = true);
+                          },
+                          onVerticalDragUpdate: (DragUpdateDetails details) {
+                            setState(() {
+                              _guideY = ((_guideY ?? currentY) + details.delta.dy)
+                                  .clamp(0.0, maxGuideY);
+                            });
+                          },
+                          onVerticalDragEnd: (_) {
+                            setState(() => _isDragging = false);
+                          },
+                          onVerticalDragCancel: () {
+                            setState(() => _isDragging = false);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            width: 28,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: effectiveAccentColor,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: <BoxShadow>[
+                                BoxShadow(
+                                  color: effectiveAccentColor.withValues(
+                                    alpha: 0.35,
+                                  ),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
                                 ),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 3,
+                                ),
+                              ],
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.4),
+                                width: 1.0,
                               ),
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 3,
-                              ),
-                            ],
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.35),
-                              width: 1.0,
                             ),
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.unfold_more_rounded,
-                              size: 16,
-                              color: Colors.white,
+                            child: const Center(
+                              child: Icon(
+                                Icons.unfold_more_rounded,
+                                size: 18,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ],
         );

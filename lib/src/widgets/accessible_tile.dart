@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/accessibility_widget_theme.dart';
 import '../utils/accessibility_haptics.dart';
 import 'accessibility_scope.dart';
 
@@ -23,7 +22,7 @@ class AccessibleTile extends StatelessWidget {
   /// Optional tap handler. When provided, tapping triggers conditional haptic feedback.
   final VoidCallback? onTap;
 
-  /// Custom highlight color. Defaults to theme accent color or primary color.
+  /// Custom highlight color. Defaults to theme primary color.
   final Color? highlightColor;
 
   /// Optional corner radius for the highlight outline. Defaults to 8px.
@@ -55,10 +54,7 @@ class AccessibleTile extends StatelessWidget {
     }
 
     final ThemeData theme = Theme.of(context);
-    final AccessibilityWidgetTheme? widgetTheme = scope?.theme;
-    final Color effectiveColor = highlightColor ??
-        widgetTheme?.accentColor ??
-        theme.colorScheme.primary;
+    final Color effectiveColor = highlightColor ?? theme.colorScheme.primary;
 
     final BorderRadiusGeometry effectiveRadius =
         borderRadius ?? BorderRadius.circular(8.0);

@@ -10,9 +10,10 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: AccessibilitySettingsPage(
-            controller: controller,
+        AccessibilityScope(
+          controller: controller,
+          child: const MaterialApp(
+            home: AccessibilitySettingsPage(),
           ),
         ),
       );

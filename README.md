@@ -23,7 +23,7 @@ This package implements accessibility features informed by the [WCAG 2.1 AA Guid
   - **Dyslexia Friendly** — Applies the bundled **Andika** typeface, increases line height, expands letter spacing, and pauses animations.
 - 🔤 **Text & Typography** — Granular text scaling (80% to 200%), bold weight, line spacing (1.0x to 2.5x), letter spacing, and dyslexia-friendly font.
 - 🎨 **Color & Contrast** — High-contrast mode, full screen color inversion, color saturation slider (monochrome to saturated), and dynamic Light/Dark/System theme switching.
-- 🖼️ **Image Control** — **Hide Images** mode that removes images with zero layout space taken (`AccessibleImage`).
+- 🖼️ **Image Control** — **Hide Images** mode that replaces images with an accessible placeholder (`AccessibleImage`).
 - 🧭 **Navigation & Visual Aids**:
   - **Reading Guide Spotlight** — Dims background content while keeping the active reading line clear, with a draggable grip handle on mobile and instant cursor tracking on web.
   - **Big Cursor (Web)** — Enlarged high-contrast white cursor follower with a prominent black outline.
@@ -31,11 +31,12 @@ This package implements accessibility features informed by the [WCAG 2.1 AA Guid
   - **Highlight Headings** (`AccessibleHeading`) — Semantic header tagging with visual level accent bars.
   - **Highlight Tiles & Cards** (`AccessibleTile`) — Clear boundary outlines for tappable cards and list items.
 - 📳 **Motion & Haptics** — Reduce Motion toggle (`MediaQuery.disableAnimations`) and optional tactile vibration feedback on mobile.
-- 💾 **Automatic Persistence** — Settings are asynchronously persisted via `SharedPreferences` across app restarts, with a sticky "Reset Settings" button.
+- 💾 **Automatic Persistence** — Settings are asynchronously persisted via `SharedPreferences` across app restarts, with a "Reset Settings" button.
 - 💻 **Adaptive Platform UI**:
-  - **Mobile** — Draggable modal bottom sheet (`AccessibilityBottomSheet`).
-  - **Web / Desktop** — Floating popup card anchored directly above the floating action button (FAB).
-  - **Page Entry Point** — Full-screen `AccessibilitySettingsPage` for integration into existing settings menus.
+  - **Floating Action Button (`AccessibilityFloatingActionButton`)** — Easy entry point with customizable icon and styles.
+  - **Mobile Bottom Sheet (`AccessibilityBottomSheet`)** — Draggable modal bottom sheet.
+  - **Web / Desktop Popup** — Floating popup card anchored directly near the FAB.
+  - **Full-Screen Settings Page (`AccessibilitySettingsPage`)** — Ready to push into any app navigation or settings menu.
 
 ---
 
@@ -56,50 +57,116 @@ import 'package:accessibility_widget/accessibility_widget.dart';
 
 ---
 
-## Usage
+## Theming Process
 
-### 1. Basic Setup
+`AccessibilityWidget` adopts **zero-config theming**. You do not need any separate theme configuration class.
 
-Wrap your application tree with `AccessibilityWidget`. It automatically injects the controller, applies typography and media query overrides, renders screen overlays, and displays a circular floating action button (FAB):
+The widget automatically uses the `theme` and `darkTheme` defined in your `MaterialApp`. All accessibility preferences (high contrast, text scaling, font weighting, saturation, and dark mode override) seamlessly transform and adapt your ambient `ThemeData`.
 
 ```dart
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Accessible App',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.indigo,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.indigo,
-        brightness: Brightness.dark,
-      ),
-      home: const AccessibilityWidget(
-        child: HomeScreen(),
-      ),
-    );
-  }
-}
+MaterialApp(
+  title: 'Accessible App',
+  theme: ThemeData(
+    useMaterial3: true,
+    colorSchemeSeed: Colors.indigo,
+    brightness: Brightness.light,
+  ),
+  darkTheme: ThemeData(
+    useMaterial3: true,
+    colorSchemeSeed: Colors.indigo,
+    brightness: Brightness.dark,
+  ),
+  home: const AccessibilityWidget(
+    child: HomeScreen(),
+  ),
+);
 ```
 
 ---
 
-### 2. Using Accessible Components
+## Accessing the Floating Action Button (FAB)
 
-Use the bundled accessible wrapper widgets throughout your UI to take full advantage of accessibility preferences:
+To give users quick access to accessibility preferences, place `AccessibilityFloatingActionButton` directly into the `floatingActionButton` property of your `Scaffold`:
 
-#### Accessible Headings
+```dart
+Scaffold(
+  appBar: AppBar(title: const Text('Home')),
+  body: const HomeScreenBody(),
+  floatingActionButton: const AccessibilityFloatingActionButton(),
+)
+```
+
+### Customizing the FAB Icon & Style
+You can customize the FAB's icon, colors, and shape via constructor properties:
+
+```dart
+AccessibilityFloatingActionButton(
+  // Customize the icon (defaults to Icons.accessibility_new)
+  icon: Icons.accessibility,
+  
+  // Custom colors (defaults to theme's colorScheme.primary / onPrimary)
+  backgroundColor: Colors.deepPurple,
+  foregroundColor: Colors.white,
+  
+  // Custom tooltip
+  tooltip: 'Open accessibility controls',
+  
+  // Custom shape
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+)
+```
+
+---
+
+## Accessing the Settings Page & Bottom Sheet
+
+You can trigger the accessibility preferences through multiple UI entry points:
+
+### 1. Modal Bottom Sheet / Anchored Web Popup
+Open the modal preferences sheet programmatically from any button, menu, or app bar action:
+
+```dart
+AccessibilityBottomSheet.show(context);
+```
+
+### 2. Dedicated Settings Page (`AccessibilitySettingsPage`)
+Push the full-screen settings page from your existing settings menu or drawer:
+
+```dart
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => const AccessibilitySettingsPage(),
+  ),
+);
+```
+
+### 3. Controller & Scope
+Access the current settings or manipulate them programmatically from anywhere in the widget tree:
+
+```dart
+final scope = AccessibilityScope.of(context);
+final controller = scope.controller;
+final settings = scope.settings;
+
+// Apply a preset profile
+controller.applyProfile(AccessibilityProfile.dyslexia);
+
+// Toggle individual settings
+controller.toggleHighContrast();
+controller.setTextScale(1.4);
+
+// Reset all settings to defaults
+controller.reset();
+```
+
+---
+
+## Accessible UI Components
+
+Use the bundled accessible wrapper widgets throughout your application:
+
+### Accessible Headings
 Enforces semantic header tags for screen readers and displays visual accent bars when heading highlights are enabled:
 
 ```dart
@@ -109,8 +176,8 @@ AccessibleHeading(
 )
 ```
 
-#### Accessible Images
-Hides images completely with zero layout space when the user enables "Hide Images":
+### Accessible Images
+Replaces images with an accessible placeholder carrying a semantic label when the user enables "Hide Images":
 
 ```dart
 AccessibleImage(
@@ -119,8 +186,8 @@ AccessibleImage(
 )
 ```
 
-#### Accessible Links
-Adds visual accent indicators and optional tactile haptic feedback on tap:
+### Accessible Links
+Adds visual accent indicators, underlines, and optional tactile haptic feedback on tap:
 
 ```dart
 AccessibleLink(
@@ -129,7 +196,7 @@ AccessibleLink(
 )
 ```
 
-#### Accessible Cards & Tiles
+### Accessible Cards & Tiles
 Highlights card boundaries and item borders when "Highlight Tiles & Cards" is enabled:
 
 ```dart
@@ -141,59 +208,6 @@ AccessibleTile(
       subtitle: Text('Manage your profile and privacy preferences'),
     ),
   ),
-)
-```
-
----
-
-### 3. Programmatic Navigation & Dialogs
-
-Open the accessibility preferences programmatically from your app bar, drawer, or existing settings menu:
-
-#### Open Modal Bottom Sheet / Web Anchored Popup
-```dart
-// Opens as a modal bottom sheet on mobile, or as an anchored popup docked to the FAB on web
-AccessibilityBottomSheet.show(context);
-```
-
-#### Navigate to Dedicated Settings Page
-```dart
-Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => const AccessibilitySettingsPage(),
-  ),
-);
-```
-
-#### Access Controller & Settings Directly
-```dart
-final scope = AccessibilityScope.of(context);
-final controller = scope.controller;
-final settings = scope.settings;
-
-// Apply a preset profile
-controller.applyProfile(AccessibilityProfile.dyslexia);
-
-// Reset all settings to defaults
-controller.reset();
-```
-
----
-
-### 4. Custom Theming
-
-Customize the look and feel of the accessibility FAB, bottom sheet, and highlight accents using `AccessibilityWidgetTheme`:
-
-```dart
-AccessibilityWidget(
-  theme: AccessibilityWidgetTheme(
-    accentColor: Colors.deepPurple,
-    fabBackgroundColor: Colors.deepPurple,
-    fabForegroundColor: Colors.white,
-    fabShape: const CircleBorder(),
-  ),
-  child: const HomeScreen(),
 )
 ```
 

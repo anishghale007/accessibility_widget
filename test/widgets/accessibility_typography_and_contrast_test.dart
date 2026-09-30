@@ -5,23 +5,15 @@ import 'package:accessibility_widget/accessibility_widget.dart';
 void main() {
   group('AccessibilityWidget Typography & Contrast', () {
     testWidgets('applies dyslexia font, line spacing, and letter spacing across theme', (WidgetTester tester) async {
-      final AccessibilityController controller = AccessibilityController(
-        store: InMemoryAccessibilityStore(),
-      );
-
-      controller.toggleDyslexiaFont();
-      controller.setLineSpacing(1.8);
-      controller.setLetterSpacing(2.0);
-      controller.toggleBoldText();
-
       late ThemeData observedTheme;
+      late BuildContext savedContext;
 
       await tester.pumpWidget(
         MaterialApp(
           home: AccessibilityWidget(
-            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
+                savedContext = context;
                 observedTheme = Theme.of(context);
                 return Scaffold(
                   body: Text(
@@ -37,6 +29,16 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      final AccessibilityController controller =
+          AccessibilityScope.of(savedContext).controller;
+
+      controller.toggleDyslexiaFont();
+      controller.setLineSpacing(1.8);
+      controller.setLetterSpacing(2.0);
+      controller.toggleBoldText();
+
+      await tester.pumpAndSettle();
+
       final TextStyle? bodyStyle = observedTheme.textTheme.bodyMedium;
       expect(bodyStyle, isNotNull);
       expect(bodyStyle!.fontFamily, contains('Andika'));
@@ -46,21 +48,16 @@ void main() {
     });
 
     testWidgets('applies high contrast ColorScheme and card styling', (WidgetTester tester) async {
-      final AccessibilityController controller = AccessibilityController(
-        store: InMemoryAccessibilityStore(),
-      );
-
-      controller.toggleHighContrast();
-
       late ThemeData observedTheme;
       late MediaQueryData observedMedia;
+      late BuildContext savedContext;
 
       await tester.pumpWidget(
         MaterialApp(
           home: AccessibilityWidget(
-            controller: controller,
             child: Builder(
               builder: (BuildContext context) {
+                savedContext = context;
                 observedTheme = Theme.of(context);
                 observedMedia = MediaQuery.of(context);
                 return const Scaffold(
@@ -73,6 +70,12 @@ void main() {
           ),
         ),
       );
+
+      await tester.pumpAndSettle();
+
+      final AccessibilityController controller =
+          AccessibilityScope.of(savedContext).controller;
+      controller.toggleHighContrast();
 
       await tester.pumpAndSettle();
 
