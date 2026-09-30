@@ -97,20 +97,21 @@ Scaffold(
 ```
 
 ### Customizing the FAB Icon & Style
+
 You can customize the FAB's icon, colors, and shape via constructor properties:
 
 ```dart
 AccessibilityFloatingActionButton(
   // Customize the icon (defaults to Icons.accessibility_new)
   icon: Icons.accessibility,
-  
+
   // Custom colors (defaults to theme's colorScheme.primary / onPrimary)
   backgroundColor: Colors.deepPurple,
   foregroundColor: Colors.white,
-  
+
   // Custom tooltip
   tooltip: 'Open accessibility controls',
-  
+
   // Custom shape
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
 )
@@ -123,6 +124,7 @@ AccessibilityFloatingActionButton(
 You can trigger the accessibility preferences through multiple UI entry points:
 
 ### 1. Modal Bottom Sheet / Anchored Web Popup
+
 Open the modal preferences sheet programmatically from any button, menu, or app bar action:
 
 ```dart
@@ -130,6 +132,7 @@ AccessibilityBottomSheet.show(context);
 ```
 
 ### 2. Dedicated Settings Page (`AccessibilitySettingsPage`)
+
 Push the full-screen settings page from your existing settings menu or drawer:
 
 ```dart
@@ -142,6 +145,7 @@ Navigator.push(
 ```
 
 ### 3. Controller & Scope
+
 Access the current settings or manipulate them programmatically from anywhere in the widget tree:
 
 ```dart
@@ -167,6 +171,7 @@ controller.reset();
 Use the bundled accessible wrapper widgets throughout your application:
 
 ### Accessible Headings
+
 Enforces semantic header tags for screen readers and displays visual accent bars when heading highlights are enabled:
 
 ```dart
@@ -177,6 +182,7 @@ AccessibleHeading(
 ```
 
 ### Accessible Images
+
 Replaces images with an accessible placeholder carrying a semantic label when the user enables "Hide Images":
 
 ```dart
@@ -187,6 +193,7 @@ AccessibleImage(
 ```
 
 ### Accessible Links
+
 Adds visual accent indicators, underlines, and optional tactile haptic feedback on tap:
 
 ```dart
@@ -197,6 +204,7 @@ AccessibleLink(
 ```
 
 ### Accessible Cards & Tiles
+
 Highlights card boundaries and item borders when "Highlight Tiles & Cards" is enabled:
 
 ```dart
@@ -218,6 +226,17 @@ AccessibleTile(
 To power the **Dyslexia Friendly** and low-vision accessibility mode, this package bundles the [Andika](https://software.sil.org/andika/) typeface (distributed under the [SIL Open Font License](https://openfontlicense.org/)), a font specifically engineered by SIL International for clear letter distinctions and high readability.
 
 The package includes four styles (Regular, Bold, Italic, and Bold-Italic), which adds **~2.5 MB** to your overall asset bundle. When dyslexia mode is disabled, your app renders with its standard default font.
+
+---
+
+## Acknowledgements & Inspirations
+
+This package was created with great inspiration from:
+
+- [Accessible Web Demo](https://accessibleweb.pages.dev/)
+- [accessibility Flutter package](https://pub.dev/packages/accessibility)
+
+Special thanks to the authors and maintainers of these projects for their pioneering work and contributions to digital accessibility.
 
 ---
 
