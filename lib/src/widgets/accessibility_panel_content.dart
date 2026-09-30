@@ -244,11 +244,15 @@ class AccessibilityPanelContent extends StatelessWidget {
     String title,
     IconData icon,
   ) {
+    final ThemeData themeData = Theme.of(context);
+    final Color headerColor =
+        theme.accentColor ?? themeData.colorScheme.primary;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: <Widget>[
-          Icon(icon, size: 20, color: theme.accentColor),
+          Icon(icon, size: 20, color: headerColor),
           const SizedBox(width: 8),
           Text(
             title,
@@ -256,7 +260,7 @@ class AccessibilityPanelContent extends StatelessWidget {
                 TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: theme.accentColor,
+                  color: headerColor,
                 ),
           ),
         ],
@@ -346,21 +350,32 @@ class AccessibilityPanelContent extends StatelessWidget {
     required VoidCallback onTap,
     required AccessibilityWidgetTheme theme,
   }) {
-    final Color borderColor = isSelected
-        ? (theme.accentColor ?? Theme.of(context).colorScheme.primary)
-        : Colors.transparent;
+    final ThemeData themeData = Theme.of(context);
+    final ColorScheme colorScheme = themeData.colorScheme;
+    final bool isDark = themeData.brightness == Brightness.dark;
+
+    final Color accentColor = theme.accentColor ?? colorScheme.primary;
+    final Color borderColor =
+        isSelected ? accentColor : (isDark ? Colors.white12 : Colors.black12);
+
+    final Color cardBg = isSelected
+        ? (accentColor.withValues(alpha: isDark ? 0.22 : 0.12))
+        : (theme.cardBackgroundColor ?? colorScheme.surfaceContainerHighest);
+
+    final Color titleColor = isSelected
+        ? (isDark ? Colors.white : accentColor)
+        : colorScheme.onSurface;
+
+    final Color descColor = colorScheme.onSurfaceVariant;
 
     return Card(
       elevation: isSelected ? 2 : 0,
-      color: isSelected
-          ? (theme.accentColor?.withValues(alpha: 0.12) ??
-              Theme.of(context).colorScheme.primaryContainer)
-          : theme.cardBackgroundColor,
+      color: cardBg,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
           color: borderColor,
-          width: isSelected ? 2 : 1,
+          width: isSelected ? 2.0 : 1.0,
         ),
       ),
       child: InkWell(
@@ -376,32 +391,33 @@ class AccessibilityPanelContent extends StatelessWidget {
                   Icon(
                     icon,
                     size: 20,
-                    color: isSelected
-                        ? (theme.accentColor ??
-                            Theme.of(context).colorScheme.primary)
-                        : Theme.of(context).iconTheme.color,
+                    color: isSelected ? accentColor : colorScheme.onSurface,
                   ),
                   const Spacer(),
                   if (isSelected)
                     Icon(
                       Icons.check_circle,
                       size: 18,
-                      color: theme.accentColor ??
-                          Theme.of(context).colorScheme.primary,
+                      color: accentColor,
                     ),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
                 title,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: titleColor,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 description,
-                style:
-                    TextStyle(fontSize: 11, color: Theme.of(context).hintColor),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: descColor,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -420,13 +436,27 @@ class AccessibilityPanelContent extends StatelessWidget {
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
+    final ThemeData themeData = Theme.of(context);
+    final ColorScheme colorScheme = themeData.colorScheme;
+
     return SwitchListTile.adaptive(
-      title: Text(title,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-      subtitle: Text(subtitle,
-          style: TextStyle(fontSize: 12, color: Theme.of(context).hintColor)),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          fontSize: 12,
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
       value: value,
-      activeThumbColor: theme.accentColor,
+      activeThumbColor: theme.accentColor ?? colorScheme.primary,
       contentPadding: EdgeInsets.zero,
       onChanged: onChanged,
     );
@@ -443,34 +473,84 @@ class AccessibilityPanelContent extends StatelessWidget {
     required String valueLabel,
     required ValueChanged<double> onChanged,
   }) {
+    final ThemeData themeData = Theme.of(context);
+    final ColorScheme colorScheme = themeData.colorScheme;
+    final bool isDark = themeData.brightness == Brightness.dark;
+
+    final Color titleColor = colorScheme.onSurface;
+    final Color effectiveAccent = theme.accentColor ?? colorScheme.primary;
+
+    // High-visibility value label badge with crisp contrast
+    final Color badgeBg = isDark
+        ? effectiveAccent.withValues(alpha: 0.22)
+        : effectiveAccent.withValues(alpha: 0.12);
+    final Color badgeBorder = effectiveAccent.withValues(alpha: 0.35);
+    final Color badgeTextColor = isDark
+        ? (effectiveAccent == Colors.black ? Colors.white : effectiveAccent)
+        : (effectiveAccent == Colors.white ? Colors.black : effectiveAccent);
+
+    final Color activeTrack = effectiveAccent;
+    final Color inactiveTrack = isDark
+        ? effectiveAccent.withValues(alpha: 0.3)
+        : effectiveAccent.withValues(alpha: 0.22);
+    final Color thumbColor = effectiveAccent;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w600)),
               Text(
-                valueLabel,
+                title,
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: theme.accentColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: titleColor,
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                decoration: BoxDecoration(
+                  color: badgeBg,
+                  borderRadius: BorderRadius.circular(6.0),
+                  border: Border.all(
+                    color: badgeBorder,
+                    width: 1.0,
+                  ),
+                ),
+                child: Text(
+                  valueLabel,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: badgeTextColor,
+                  ),
                 ),
               ),
             ],
           ),
-          Slider.adaptive(
-            value: value.clamp(min, max),
-            min: min,
-            max: max,
-            divisions: divisions,
-            activeColor: theme.accentColor,
-            onChanged: onChanged,
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: activeTrack,
+              inactiveTrackColor: inactiveTrack,
+              thumbColor: thumbColor,
+              overlayColor: thumbColor.withValues(alpha: 0.15),
+              valueIndicatorColor: thumbColor,
+              activeTickMarkColor: isDark ? Colors.black87 : Colors.white,
+              inactiveTickMarkColor: inactiveTrack,
+              trackHeight: 4.0,
+            ),
+            child: Slider(
+              value: value.clamp(min, max),
+              min: min,
+              max: max,
+              divisions: divisions,
+              onChanged: onChanged,
+            ),
           ),
         ],
       ),
@@ -483,14 +563,23 @@ class AccessibilityPanelContent extends StatelessWidget {
     AccessibilitySettings settings,
     AccessibilityWidgetTheme theme,
   ) {
+    final ThemeData themeData = Theme.of(context);
+    final ColorScheme colorScheme = themeData.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text('Theme Appearance',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 6),
+          Text(
+            'Theme Appearance',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
           SegmentedButton<bool?>(
             segments: const <ButtonSegment<bool?>>[
               ButtonSegment<bool?>(

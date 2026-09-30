@@ -106,34 +106,35 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
 
           Widget content = widget.child;
 
-          // 1. Dyslexia / Spacing / Text Styling & Font adjustments via DefaultTextStyle
+          // 1. Text & Typography transformations (Dyslexia Font, Line Spacing, Letter Spacing, Bold)
+          final TextStyle baseOverrideStyle = TextStyle(
+            fontWeight: settings.boldText ? FontWeight.bold : null,
+            letterSpacing:
+                settings.letterSpacing != 0.0 ? settings.letterSpacing : null,
+            height: settings.lineSpacing != 1.0 ? settings.lineSpacing : null,
+            fontFamily:
+                settings.dyslexiaFont ? 'packages/accessibility_widget/Andika' : null,
+            fontFamilyFallback: settings.dyslexiaFont
+                ? const <String>[
+                    'packages/accessibility_widget/Andika',
+                    'Andika',
+                    'monospace',
+                    'sans-serif'
+                  ]
+                : null,
+          );
+
           if (settings.lineSpacing != 1.0 ||
               settings.letterSpacing != 0.0 ||
               settings.boldText ||
               settings.dyslexiaFont) {
             content = DefaultTextStyle.merge(
-              style: TextStyle(
-                fontWeight: settings.boldText ? FontWeight.bold : null,
-                letterSpacing: settings.letterSpacing != 0.0
-                    ? settings.letterSpacing
-                    : null,
-                height:
-                    settings.lineSpacing != 1.0 ? settings.lineSpacing : null,
-                fontFamily: settings.dyslexiaFont ? 'Andika' : null,
-                fontFamilyFallback: settings.dyslexiaFont
-                    ? const <String>[
-                        'packages/accessibility_widget/Andika',
-                        'Andika',
-                        'monospace',
-                        'sans-serif'
-                      ]
-                    : null,
-              ),
+              style: baseOverrideStyle,
               child: content,
             );
           }
 
-          // 2. High Contrast / Invert Colors / Saturation Filters
+          // 2. Color Inversion Filter
           if (settings.invertColors) {
             content = ColorFiltered(
               colorFilter: const ColorFilter.matrix(<double>[
@@ -162,6 +163,7 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
             );
           }
 
+          // 3. Saturation Filter
           if (settings.saturation != 1.0) {
             final double s = settings.saturation;
             const double lumR = 0.3086;
@@ -198,7 +200,7 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
             );
           }
 
-          // 3. Platform Overlays: Reading Guide & Big Cursor
+          // 4. Platform Overlays: Reading Guide & Big Cursor
           if (settings.readingGuide) {
             content = ReadingGuideOverlay(
               guideColor: resolvedTheme.accentColor,
@@ -212,7 +214,8 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
             );
           }
 
-          // 4. MediaQuery Overrides (textScaler, platformBrightness, boldText, animations)
+          // 5. Theme & Typography injection
+          final ThemeData ambientTheme = Theme.of(context);
           final MediaQueryData ambientMedia = MediaQuery.maybeOf(context) ??
               MediaQueryData.fromView(View.of(context));
 
@@ -220,6 +223,137 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
               ? (settings.darkMode! ? Brightness.dark : Brightness.light)
               : ambientMedia.platformBrightness;
 
+          final bool isDark = effectiveBrightness == Brightness.dark;
+
+          // Baseline theme matching effective brightness (ensuring proper black/white text colors)
+          final ThemeData baselineTheme = (isDark
+                  ? ThemeData.dark(useMaterial3: ambientTheme.useMaterial3)
+                  : ThemeData.light(useMaterial3: ambientTheme.useMaterial3))
+              .copyWith(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: ambientTheme.colorScheme.primary,
+              brightness: effectiveBrightness,
+            ),
+          );
+
+          ColorScheme effectiveColorScheme = baselineTheme.colorScheme;
+          if (settings.highContrast) {
+            effectiveColorScheme = isDark
+                ? ColorScheme.highContrastDark().copyWith(
+                    primary: const Color(0xFFFFD600),
+                    onPrimary: Colors.black,
+                    secondary: const Color(0xFF00E5FF),
+                    onSecondary: Colors.black,
+                    surface: Colors.black,
+                    onSurface: Colors.white,
+                    outline: Colors.white,
+                  )
+                : ColorScheme.highContrastLight().copyWith(
+                    primary: const Color(0xFF002B7F),
+                    onPrimary: Colors.white,
+                    secondary: const Color(0xFF004D40),
+                    onSecondary: Colors.white,
+                    surface: Colors.white,
+                    onSurface: Colors.black,
+                    outline: Colors.black,
+                  );
+          } else if (settings.darkMode == null &&
+              ambientTheme.brightness == effectiveBrightness) {
+            effectiveColorScheme = ambientTheme.colorScheme;
+          }
+
+          // Use the textTheme of the matching brightness to ensure text colors are never inverted
+          final TextTheme baseTextTheme = (settings.darkMode != null &&
+                  settings.darkMode != (ambientTheme.brightness == Brightness.dark))
+              ? baselineTheme.textTheme
+              : ambientTheme.textTheme;
+
+          // Build modified typography for ThemeData
+          TextStyle transformStyle(TextStyle? base) {
+            if (base == null) {
+              return baseOverrideStyle;
+            }
+            return base.copyWith(
+              fontFamily: settings.dyslexiaFont
+                  ? 'packages/accessibility_widget/Andika'
+                  : base.fontFamily,
+              fontFamilyFallback: settings.dyslexiaFont
+                  ? const <String>[
+                      'packages/accessibility_widget/Andika',
+                      'Andika',
+                      'monospace',
+                      'sans-serif'
+                    ]
+                  : base.fontFamilyFallback,
+              fontWeight: settings.boldText ? FontWeight.bold : base.fontWeight,
+              letterSpacing: settings.letterSpacing != 0.0
+                  ? ((base.letterSpacing ?? 0.0) + settings.letterSpacing)
+                  : base.letterSpacing,
+              height: settings.lineSpacing != 1.0
+                  ? ((base.height ?? 1.25) * settings.lineSpacing)
+                  : base.height,
+            );
+          }
+
+          TextTheme modifiedTextTheme = baseTextTheme;
+          if (settings.dyslexiaFont ||
+              settings.boldText ||
+              settings.letterSpacing != 0.0 ||
+              settings.lineSpacing != 1.0) {
+            modifiedTextTheme = TextTheme(
+              displayLarge: transformStyle(modifiedTextTheme.displayLarge),
+              displayMedium: transformStyle(modifiedTextTheme.displayMedium),
+              displaySmall: transformStyle(modifiedTextTheme.displaySmall),
+              headlineLarge: transformStyle(modifiedTextTheme.headlineLarge),
+              headlineMedium: transformStyle(modifiedTextTheme.headlineMedium),
+              headlineSmall: transformStyle(modifiedTextTheme.headlineSmall),
+              titleLarge: transformStyle(modifiedTextTheme.titleLarge),
+              titleMedium: transformStyle(modifiedTextTheme.titleMedium),
+              titleSmall: transformStyle(modifiedTextTheme.titleSmall),
+              bodyLarge: transformStyle(modifiedTextTheme.bodyLarge),
+              bodyMedium: transformStyle(modifiedTextTheme.bodyMedium),
+              bodySmall: transformStyle(modifiedTextTheme.bodySmall),
+              labelLarge: transformStyle(modifiedTextTheme.labelLarge),
+              labelMedium: transformStyle(modifiedTextTheme.labelMedium),
+              labelSmall: transformStyle(modifiedTextTheme.labelSmall),
+            );
+          }
+
+          final ThemeData modifiedTheme = ambientTheme.copyWith(
+            brightness: effectiveBrightness,
+            colorScheme: effectiveColorScheme,
+            textTheme: modifiedTextTheme,
+            scaffoldBackgroundColor: settings.highContrast
+                ? (isDark ? Colors.black : Colors.white)
+                : (settings.darkMode != null
+                    ? (isDark ? const Color(0xFF121212) : const Color(0xFFFAFAFA))
+                    : ambientTheme.scaffoldBackgroundColor),
+            cardTheme: settings.highContrast
+                ? ambientTheme.cardTheme.copyWith(
+                    color: isDark ? const Color(0xFF121212) : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isDark ? Colors.white : Colors.black,
+                        width: 2.0,
+                      ),
+                    ),
+                  )
+                : ambientTheme.cardTheme,
+            dividerTheme: settings.highContrast
+                ? ambientTheme.dividerTheme.copyWith(
+                    color: isDark ? Colors.white70 : Colors.black87,
+                    thickness: 1.5,
+                  )
+                : ambientTheme.dividerTheme,
+          );
+
+          content = Theme(
+            data: modifiedTheme,
+            child: content,
+          );
+
+          // 6. MediaQuery Overrides
           final MediaQueryData modifiedMedia = ambientMedia.copyWith(
             textScaler: TextScaler.linear(settings.textScale),
             boldText: settings.boldText,
@@ -227,23 +361,6 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
             platformBrightness: effectiveBrightness,
             highContrast: settings.highContrast,
           );
-
-          final ThemeData ambientTheme = Theme.of(context);
-          if (settings.darkMode != null &&
-              ambientTheme.brightness != effectiveBrightness) {
-            final ColorScheme newColorScheme = ColorScheme.fromSeed(
-              seedColor: ambientTheme.colorScheme.primary,
-              brightness: effectiveBrightness,
-            );
-            content = Theme(
-              data: ThemeData(
-                useMaterial3: ambientTheme.useMaterial3,
-                brightness: effectiveBrightness,
-                colorScheme: newColorScheme,
-              ),
-              child: content,
-            );
-          }
 
           content = MediaQuery(
             data: modifiedMedia,

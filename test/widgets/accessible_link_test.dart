@@ -55,6 +55,47 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.open_in_new), findsOneWidget);
+
+      // Verify the highlighter Container has bright yellow background and black border
+      final Container container = tester.widget<Container>(
+        find.descendant(
+          of: find.byType(AccessibleLink),
+          matching: find.byType(Container),
+        ).first,
+      );
+      final BoxDecoration decoration = container.decoration as BoxDecoration;
+      expect(decoration.color, const Color(0xFFFFEB3B));
+      expect(decoration.border, isNotNull);
+    });
+
+    testWidgets('uses custom highlightColor when specified', (WidgetTester tester) async {
+      final AccessibilityController controller = AccessibilityController(
+        store: InMemoryAccessibilityStore(),
+      );
+      controller.toggleHighlightLinks();
+
+      await tester.pumpWidget(
+        AccessibilityScope(
+          controller: controller,
+          child: const MaterialApp(
+            home: Scaffold(
+              body: AccessibleLink(
+                highlightColor: Color(0xFF00E5FF),
+                child: Text('Custom Highlight Link'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Container container = tester.widget<Container>(
+        find.descendant(
+          of: find.byType(AccessibleLink),
+          matching: find.byType(Container),
+        ).first,
+      );
+      final BoxDecoration decoration = container.decoration as BoxDecoration;
+      expect(decoration.color, const Color(0xFF00E5FF));
     });
   });
 }
