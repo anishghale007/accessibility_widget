@@ -23,14 +23,15 @@ This package implements accessibility features informed by the [WCAG 2.1 AA Guid
   - **Dyslexia Friendly** — Applies the bundled **Andika** typeface, increases line height, expands letter spacing, and pauses animations.
 - 🔤 **Text & Typography** — Granular text scaling (80% to 200%), bold weight, line spacing (1.0x to 2.5x), letter spacing, and dyslexia-friendly font.
 - 🎨 **Color & Contrast** — High-contrast mode, full screen color inversion, color saturation slider (monochrome to saturated), and dynamic Light/Dark/System theme switching.
-- 🖼️ **Image Control** — **Hide Images** mode that replaces images with an accessible placeholder (`AccessibleImage`).
+- 🖼️ **Image Control** — **Hide Images** mode that hides images cleanly or swaps to a custom placeholder (`AccessibleImage`).
 - 🧭 **Navigation & Visual Aids**:
   - **Reading Guide Spotlight** — Dims background content while keeping the active reading line clear, with a draggable grip handle on mobile and instant cursor tracking on web.
   - **Big Cursor (Web)** — Enlarged high-contrast white cursor follower with a prominent black outline.
   - **Highlight Links** (`AccessibleLink`) — Outlines clickable links and adds visual link indicators.
   - **Highlight Headings** (`AccessibleHeading`) — Semantic header tagging with visual level accent bars.
   - **Highlight Tiles & Cards** (`AccessibleTile`) — Clear boundary outlines for tappable cards and list items.
-- 📳 **Motion & Haptics** — Reduce Motion toggle (`MediaQuery.disableAnimations`) and optional tactile vibration feedback on mobile.
+- 🎬 **Motion & Animations** (`AccessibleAnimation`) — Reduce Motion toggle (`MediaQuery.disableAnimations`), automatic `AnimationController` lifecycle management, and dynamic reactive builders.
+- 📳 **Haptics** — Optional tactile vibration feedback on mobile when tapping interactive elements.
 - 💾 **Automatic Persistence** — Settings are asynchronously persisted via `SharedPreferences` across app restarts, with a "Reset Settings" button.
 - 💻 **Adaptive Platform UI**:
   - **Floating Action Button (`AccessibilityFloatingActionButton`)** — Easy entry point with customizable icon and styles.
@@ -97,21 +98,20 @@ Scaffold(
 ```
 
 ### Customizing the FAB Icon & Style
-
 You can customize the FAB's icon, colors, and shape via constructor properties:
 
 ```dart
 AccessibilityFloatingActionButton(
   // Customize the icon (defaults to Icons.accessibility_new)
   icon: Icons.accessibility,
-
+  
   // Custom colors (defaults to theme's colorScheme.primary / onPrimary)
   backgroundColor: Colors.deepPurple,
   foregroundColor: Colors.white,
-
+  
   // Custom tooltip
   tooltip: 'Open accessibility controls',
-
+  
   // Custom shape
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
 )
@@ -124,7 +124,6 @@ AccessibilityFloatingActionButton(
 You can trigger the accessibility preferences through multiple UI entry points:
 
 ### 1. Modal Bottom Sheet / Anchored Web Popup
-
 Open the modal preferences sheet programmatically from any button, menu, or app bar action:
 
 ```dart
@@ -132,7 +131,6 @@ AccessibilityBottomSheet.show(context);
 ```
 
 ### 2. Dedicated Settings Page (`AccessibilitySettingsPage`)
-
 Push the full-screen settings page from your existing settings menu or drawer:
 
 ```dart
@@ -145,7 +143,6 @@ Navigator.push(
 ```
 
 ### 3. Controller & Scope
-
 Access the current settings or manipulate them programmatically from anywhere in the widget tree:
 
 ```dart
@@ -218,6 +215,27 @@ AccessibleTile(
 )
 ```
 
+### Accessible Animations & Motion
+
+Automatically pauses animations or swaps to a static fallback when "Reduce Motion" is enabled:
+
+```dart
+// Basic fallback swapping:
+AccessibleAnimation(
+  fallback: const StaticBanner(),
+  child: const RotatingBannerAnimation(),
+)
+
+// Dynamic builder pattern:
+AccessibleAnimation.builder(
+  controller: myAnimationController,
+  builder: (context, isAnimating, child) {
+    return isAnimating ? SpinningLogo(child: child) : StaticLogo(child: child);
+  },
+  child: const Logo(),
+)
+```
+
 ---
 
 ## A Note on App Size & Typography
@@ -231,7 +249,6 @@ The package includes four styles (Regular, Bold, Italic, and Bold-Italic), which
 ## Acknowledgements & Inspirations
 
 This package was created with great inspiration from:
-
 - [Accessible Web Demo](https://accessibleweb.pages.dev/)
 - [accessibility Flutter package](https://pub.dev/packages/accessibility)
 

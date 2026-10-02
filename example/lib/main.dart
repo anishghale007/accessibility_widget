@@ -77,7 +77,6 @@ class _AccessibilityShowcaseScreenState
     final AccessibilitySettings settings = scope.settings;
     final AccessibilityController controller = scope.controller;
     final ThemeData theme = Theme.of(context);
-    final bool animationsDisabled = MediaQuery.of(context).disableAnimations;
 
     return Scaffold(
       appBar: AppBar(
@@ -372,46 +371,51 @@ class _AccessibilityShowcaseScreenState
                       style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: <Widget>[
-                        AnimatedBuilder(
-                          animation: _animController,
-                          builder: (context, child) {
-                            final double angle = animationsDisabled
-                                ? 0.0
-                                : _animController.value * 2 * 3.14159;
-                            return Transform.rotate(
-                              angle: angle,
-                              child: Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(
-                                  Icons.sync,
-                                  color: theme.colorScheme.onPrimary,
+                    AccessibleAnimation.builder(
+                      controller: _animController,
+                      builder: (context, isAnimating, child) {
+                        return Row(
+                          children: <Widget>[
+                            AnimatedBuilder(
+                              animation: _animController,
+                              builder: (context, child) {
+                                final double angle = isAnimating
+                                    ? _animController.value * 2 * 3.14159
+                                    : 0.0;
+                                return Transform.rotate(
+                                  angle: angle,
+                                  child: Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      Icons.sync,
+                                      color: theme.colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                isAnimating
+                                    ? 'Status: Animations RUNNING smoothly'
+                                    : 'Status: Animations PAUSED (Reduce Motion active)',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: isAnimating
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.error,
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            animationsDisabled
-                                ? 'Status: Animations PAUSED (Reduce Motion active)'
-                                : 'Status: Animations RUNNING smoothly',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: animationsDisabled
-                                  ? theme.colorScheme.error
-                                  : theme.colorScheme.primary,
                             ),
-                          ),
-                        ),
-                      ],
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
