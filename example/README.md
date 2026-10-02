@@ -119,7 +119,7 @@ AccessibilityFloatingActionButton(
 - 🖼️ **Image Hiding** — Demonstrating `AccessibleImage` clean hiding when enabled.
 - 🔗 **Links & Haptics** — Demonstrating `AccessibleLink` with visual highlights and tactile feedback.
 - 🃏 **Cards & Boundaries** — Testing `AccessibleTile` border outlines.
-- ⏱️ **Motion Reduction** — Rotation animation demonstrating instant pausing via `MediaQuery.disableAnimations`.
+- ⏱️ **Motion Reduction** — Rotation animation demonstrating manual pausing by checking `MediaQuery.of(context).disableAnimations`.
 - 🧭 **Overlays** — Reading Guide spotlight overlay and Big Cursor tracking on Web.
 - 🌗 **Adaptive Appearance** — Switching between System, Light, and Dark themes.
 

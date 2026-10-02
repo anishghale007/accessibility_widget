@@ -218,6 +218,26 @@ AccessibleTile(
 )
 ```
 
+### Handling Animations & Motion
+
+When "Reduce Motion" or "Stop Animations" is toggled in the accessibility preferences, `AccessibilityWidget` automatically updates `MediaQueryData.disableAnimations`.
+
+For now, animations in custom widgets should be manually paused or disabled by checking `MediaQuery.of(context).disableAnimations`:
+
+```dart
+final bool animationsDisabled = MediaQuery.of(context).disableAnimations;
+
+// Freeze rotation or pause transitions when animations are disabled
+final double angle = animationsDisabled
+    ? 0.0
+    : _animController.value * 2 * 3.14159;
+
+Transform.rotate(
+  angle: angle,
+  child: const Icon(Icons.sync),
+)
+```
+
 ---
 
 ## A Note on App Size & Typography
