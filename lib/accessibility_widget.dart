@@ -15,6 +15,7 @@ export 'src/widgets/accessibility_overlay.dart';
 export 'src/widgets/accessibility_panel_content.dart';
 export 'src/widgets/accessibility_scope.dart';
 export 'src/widgets/accessibility_settings_page.dart';
+export 'src/widgets/accessible_animation.dart';
 export 'src/widgets/accessible_heading.dart';
 export 'src/widgets/accessible_image.dart';
 export 'src/widgets/accessible_link.dart';
