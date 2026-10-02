@@ -14,6 +14,13 @@ platforms:
   ios:
   web:
 
+topics:
+  - accessibility
+  - a11y
+  - wcag
+  - ui
+  - widget
+
 dependencies:
   flutter:
     sdk: flutter

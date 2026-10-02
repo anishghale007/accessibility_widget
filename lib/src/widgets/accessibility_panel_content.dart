@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../controller/accessibility_controller.dart';
 import '../models/accessibility_profile.dart';
 import '../models/accessibility_settings.dart';
-import '../theme/accessibility_widget_theme.dart';
 import '../utils/platform.dart';
 import 'accessibility_scope.dart';
 
@@ -28,8 +27,6 @@ class AccessibilityPanelContent extends StatelessWidget {
     final AccessibilityScope scope = AccessibilityScope.of(context);
     final AccessibilityController controller = scope.controller;
     final AccessibilitySettings settings = scope.settings;
-    final AccessibilityWidgetTheme theme = scope.theme?.resolveWith(context) ??
-        const AccessibilityWidgetTheme().resolveWith(context);
 
     return ListView(
       shrinkWrap: true,
@@ -38,16 +35,15 @@ class AccessibilityPanelContent extends StatelessWidget {
       children: <Widget>[
         // 1. Profiles Section
         _buildSectionHeader(
-            context, theme, 'Profiles', Icons.auto_awesome_outlined),
-        _buildProfilesSection(context, controller, settings, theme),
+            context, 'Profiles', Icons.auto_awesome_outlined),
+        _buildProfilesSection(context, controller, settings),
         const SizedBox(height: 16),
 
         // 2. Text Section
         _buildSectionHeader(
-            context, theme, 'Text & Typography', Icons.text_fields_outlined),
+            context, 'Text & Typography', Icons.text_fields_outlined),
         _buildSliderTile(
           context: context,
-          theme: theme,
           title: 'Text Size',
           value: settings.textScale,
           min: 0.8,
@@ -58,7 +54,6 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
         _buildSwitchTile(
           context: context,
-          theme: theme,
           title: 'Bold Text',
           subtitle: 'Increases font weight for easier reading',
           value: settings.boldText,
@@ -66,7 +61,6 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
         _buildSwitchTile(
           context: context,
-          theme: theme,
           title: 'Dyslexia Friendly Font',
           subtitle: 'Uses typography designed for readability',
           value: settings.dyslexiaFont,
@@ -74,7 +68,6 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
         _buildSliderTile(
           context: context,
-          theme: theme,
           title: 'Line Spacing',
           value: settings.lineSpacing,
           min: 1.0,
@@ -85,7 +78,6 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
         _buildSliderTile(
           context: context,
-          theme: theme,
           title: 'Letter Spacing',
           value: settings.letterSpacing,
           min: 0.0,
@@ -98,10 +90,9 @@ class AccessibilityPanelContent extends StatelessWidget {
 
         // 3. Color & Contrast Section
         _buildSectionHeader(
-            context, theme, 'Color & Contrast', Icons.contrast_outlined),
+            context, 'Color & Contrast', Icons.contrast_outlined),
         _buildSwitchTile(
           context: context,
-          theme: theme,
           title: 'High Contrast',
           subtitle: 'Enhances contrast ratio for content and borders',
           value: settings.highContrast,
@@ -109,7 +100,6 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
         _buildSwitchTile(
           context: context,
-          theme: theme,
           title: 'Invert Colors',
           subtitle: 'Inverts colors across the entire application',
           value: settings.invertColors,
@@ -117,7 +107,6 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
         _buildSliderTile(
           context: context,
-          theme: theme,
           title: 'Color Saturation',
           value: settings.saturation,
           min: 0.0,
@@ -128,14 +117,13 @@ class AccessibilityPanelContent extends StatelessWidget {
               : '${(settings.saturation * 100).round()}%',
           onChanged: controller.setSaturation,
         ),
-        _buildDarkModeOverrideTile(context, controller, settings, theme),
+        _buildDarkModeOverrideTile(context, controller, settings),
         const SizedBox(height: 16),
 
         // 4. Images Section
-        _buildSectionHeader(context, theme, 'Images', Icons.image_outlined),
+        _buildSectionHeader(context, 'Images', Icons.image_outlined),
         _buildSwitchTile(
           context: context,
-          theme: theme,
           title: 'Hide Images',
           subtitle:
               'Replaces images with placeholders to reduce cognitive clutter',
@@ -146,10 +134,9 @@ class AccessibilityPanelContent extends StatelessWidget {
 
         // 5. Navigation Aids Section
         _buildSectionHeader(
-            context, theme, 'Navigation Aids', Icons.navigation_outlined),
+            context, 'Navigation Aids', Icons.navigation_outlined),
         _buildSwitchTile(
           context: context,
-          theme: theme,
           title: 'Highlight Links',
           subtitle: 'Adds underlines and clear color highlights to links',
           value: settings.highlightLinks,
@@ -157,7 +144,6 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
         _buildSwitchTile(
           context: context,
-          theme: theme,
           title: 'Highlight Tiles & Cards',
           subtitle: 'Outlines tappable list items, cards, and boundaries',
           value: settings.highlightTiles,
@@ -165,7 +151,6 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
         _buildSwitchTile(
           context: context,
-          theme: theme,
           title: 'Highlight Headings',
           subtitle: 'Visually emphasizes section titles and headings',
           value: settings.highlightHeadings,
@@ -173,7 +158,6 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
         _buildSwitchTile(
           context: context,
-          theme: theme,
           title: 'Reading Guide',
           subtitle: platform.isWeb
               ? 'Displays a horizontal guide that follows your mouse'
@@ -184,7 +168,6 @@ class AccessibilityPanelContent extends StatelessWidget {
         if (platform.isWeb)
           _buildSwitchTile(
             context: context,
-            theme: theme,
             title: 'Big Cursor',
             subtitle: 'Enlarges the mouse pointer for better tracking',
             value: settings.bigCursor,
@@ -195,13 +178,11 @@ class AccessibilityPanelContent extends StatelessWidget {
         // 6. Motion Section
         _buildSectionHeader(
           context,
-          theme,
           'Motion & Animations',
           Icons.motion_photos_off_outlined,
         ),
         _buildSwitchTile(
           context: context,
-          theme: theme,
           title: 'Reduce Motion',
           subtitle: 'Stops animations and page transitions',
           value: settings.stopAnimations,
@@ -213,13 +194,11 @@ class AccessibilityPanelContent extends StatelessWidget {
         if (!platform.isWeb) ...<Widget>[
           _buildSectionHeader(
             context,
-            theme,
             'Feedback',
             Icons.vibration_outlined,
           ),
           _buildSwitchTile(
             context: context,
-            theme: theme,
             title: 'Haptic Feedback',
             subtitle:
                 'Provides physical vibration confirmation on tap (mobile)',
@@ -231,7 +210,7 @@ class AccessibilityPanelContent extends StatelessWidget {
 
         // 8. Reset Button (Conditionally rendered when not docked stickily)
         if (showResetButton) ...<Widget>[
-          _buildResetButton(context, controller, theme),
+          _buildResetButton(context, controller),
           const SizedBox(height: 24),
         ],
       ],
@@ -240,13 +219,11 @@ class AccessibilityPanelContent extends StatelessWidget {
 
   Widget _buildSectionHeader(
     BuildContext context,
-    AccessibilityWidgetTheme theme,
     String title,
     IconData icon,
   ) {
     final ThemeData themeData = Theme.of(context);
-    final Color headerColor =
-        theme.accentColor ?? themeData.colorScheme.primary;
+    final Color headerColor = themeData.colorScheme.primary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -256,12 +233,11 @@ class AccessibilityPanelContent extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             title,
-            style: theme.sectionTitleStyle ??
-                TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: headerColor,
-                ),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: headerColor,
+            ),
           ),
         ],
       ),
@@ -272,7 +248,6 @@ class AccessibilityPanelContent extends StatelessWidget {
     BuildContext context,
     AccessibilityController controller,
     AccessibilitySettings settings,
-    AccessibilityWidgetTheme theme,
   ) {
     return Column(
       children: <Widget>[
@@ -288,7 +263,6 @@ class AccessibilityPanelContent extends StatelessWidget {
                     settings.activeProfile == AccessibilityProfile.seizureSafe,
                 onTap: () =>
                     controller.applyProfile(AccessibilityProfile.seizureSafe),
-                theme: theme,
               ),
             ),
             const SizedBox(width: 12),
@@ -302,7 +276,6 @@ class AccessibilityPanelContent extends StatelessWidget {
                     AccessibilityProfile.visionImpaired,
                 onTap: () => controller
                     .applyProfile(AccessibilityProfile.visionImpaired),
-                theme: theme,
               ),
             ),
           ],
@@ -318,7 +291,6 @@ class AccessibilityPanelContent extends StatelessWidget {
                 icon: Icons.center_focus_strong_outlined,
                 isSelected: settings.activeProfile == AccessibilityProfile.adhd,
                 onTap: () => controller.applyProfile(AccessibilityProfile.adhd),
-                theme: theme,
               ),
             ),
             const SizedBox(width: 12),
@@ -332,7 +304,6 @@ class AccessibilityPanelContent extends StatelessWidget {
                     settings.activeProfile == AccessibilityProfile.dyslexia,
                 onTap: () =>
                     controller.applyProfile(AccessibilityProfile.dyslexia),
-                theme: theme,
               ),
             ),
           ],
@@ -348,19 +319,18 @@ class AccessibilityPanelContent extends StatelessWidget {
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
-    required AccessibilityWidgetTheme theme,
   }) {
     final ThemeData themeData = Theme.of(context);
     final ColorScheme colorScheme = themeData.colorScheme;
     final bool isDark = themeData.brightness == Brightness.dark;
 
-    final Color accentColor = theme.accentColor ?? colorScheme.primary;
+    final Color accentColor = colorScheme.primary;
     final Color borderColor =
         isSelected ? accentColor : (isDark ? Colors.white12 : Colors.black12);
 
     final Color cardBg = isSelected
         ? (accentColor.withValues(alpha: isDark ? 0.22 : 0.12))
-        : (theme.cardBackgroundColor ?? colorScheme.surfaceContainerHighest);
+        : colorScheme.surfaceContainerHighest;
 
     final Color titleColor = isSelected
         ? (isDark ? Colors.white : accentColor)
@@ -430,7 +400,6 @@ class AccessibilityPanelContent extends StatelessWidget {
 
   Widget _buildSwitchTile({
     required BuildContext context,
-    required AccessibilityWidgetTheme theme,
     required String title,
     required String subtitle,
     required bool value,
@@ -456,7 +425,7 @@ class AccessibilityPanelContent extends StatelessWidget {
         ),
       ),
       value: value,
-      activeThumbColor: theme.accentColor ?? colorScheme.primary,
+      activeThumbColor: colorScheme.primary,
       contentPadding: EdgeInsets.zero,
       onChanged: onChanged,
     );
@@ -464,7 +433,6 @@ class AccessibilityPanelContent extends StatelessWidget {
 
   Widget _buildSliderTile({
     required BuildContext context,
-    required AccessibilityWidgetTheme theme,
     required String title,
     required double value,
     required double min,
@@ -478,7 +446,7 @@ class AccessibilityPanelContent extends StatelessWidget {
     final bool isDark = themeData.brightness == Brightness.dark;
 
     final Color titleColor = colorScheme.onSurface;
-    final Color effectiveAccent = theme.accentColor ?? colorScheme.primary;
+    final Color effectiveAccent = colorScheme.primary;
 
     // High-visibility value label badge with crisp contrast
     final Color badgeBg = isDark
@@ -561,7 +529,6 @@ class AccessibilityPanelContent extends StatelessWidget {
     BuildContext context,
     AccessibilityController controller,
     AccessibilitySettings settings,
-    AccessibilityWidgetTheme theme,
   ) {
     final ThemeData themeData = Theme.of(context);
     final ColorScheme colorScheme = themeData.colorScheme;
@@ -611,7 +578,6 @@ class AccessibilityPanelContent extends StatelessWidget {
   Widget _buildResetButton(
     BuildContext context,
     AccessibilityController controller,
-    AccessibilityWidgetTheme theme,
   ) {
     return Center(
       child: OutlinedButton.icon(

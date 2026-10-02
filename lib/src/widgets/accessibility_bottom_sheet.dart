@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../controller/accessibility_controller.dart';
 import '../models/accessibility_settings.dart';
-import '../theme/accessibility_widget_theme.dart';
 import '../utils/platform.dart';
 import 'accessibility_panel_content.dart';
 import 'accessibility_scope.dart';
@@ -14,6 +13,12 @@ class AccessibilityBottomSheet extends StatelessWidget {
     this.isPopup = false,
   });
 
+  /// Notifier indicating whether the accessibility preferences sheet/popup is currently open.
+  static final ValueNotifier<bool> isOpenNotifier = ValueNotifier<bool>(false);
+
+  /// Whether the accessibility preferences sheet/popup is currently open.
+  static bool get isOpen => isOpenNotifier.value;
+
   /// Whether this is rendered as a desktop/web anchored popup card rather than a mobile modal sheet.
   final bool isPopup;
 
@@ -23,101 +28,130 @@ class AccessibilityBottomSheet extends StatelessWidget {
   /// On **Mobile**: Renders as a smooth modal draggable bottom sheet.
   static Future<void> show(
     BuildContext context, {
+    GlobalKey<NavigatorState>? navigatorKey,
     Alignment alignment = Alignment.bottomRight,
     EdgeInsets margin = const EdgeInsets.all(16.0),
-  }) {
-    final AccessibilityScope scope = AccessibilityScope.of(context);
+  }) async {
+    if (isOpen) return;
+    isOpenNotifier.value = true;
+
+    final BuildContext effectiveContext =
+        navigatorKey?.currentContext ?? context;
+    final AccessibilityScope scope = AccessibilityScope.of(effectiveContext);
     final AccessibilityController controller = scope.controller;
-    final AccessibilityWidgetTheme? theme = scope.theme;
     final bool isWeb = PlatformInfo.current.isWeb;
 
-    if (isWeb) {
-      return showDialog<void>(
-        context: context,
-        barrierColor: Colors.black26,
-        barrierDismissible: true,
-        builder: (BuildContext dialogContext) {
-          return Stack(
-            children: <Widget>[
-              SafeArea(
-                child: Align(
-                  alignment: alignment,
-                  child: Padding(
-                    padding: margin,
-                    child: AccessibilityScope(
-                      controller: controller,
-                      theme: theme,
-                      child: const AccessibilityBottomSheet(isPopup: true),
+    try {
+      if (isWeb) {
+        await showDialog<void>(
+          context: effectiveContext,
+          barrierColor: Colors.black26,
+          barrierDismissible: true,
+          builder: (BuildContext dialogContext) {
+            return Stack(
+              children: <Widget>[
+                SafeArea(
+                  child: Align(
+                    alignment: alignment,
+                    child: Padding(
+                      padding: margin,
+                      child: AccessibilityScope(
+                        controller: controller,
+                        child: const AccessibilityBottomSheet(isPopup: true),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          );
-        },
-      );
-    }
-
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext sheetContext) {
-        return AccessibilityScope(
-          controller: controller,
-          theme: theme,
-          child: const AccessibilityBottomSheet(isPopup: false),
+              ],
+            );
+          },
         );
-      },
-    );
+      } else {
+        await showModalBottomSheet<void>(
+          context: effectiveContext,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext sheetContext) {
+            return AccessibilityScope(
+              controller: controller,
+              child: const AccessibilityBottomSheet(isPopup: false),
+            );
+          },
+        );
+      }
+    } finally {
+      isOpenNotifier.value = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final AccessibilityScope scope = AccessibilityScope.of(context);
     final AccessibilitySettings settings = scope.settings;
+    final ThemeData ambientTheme = Theme.of(context);
 
-    // Dynamically resolve brightness according to the current settings.darkMode preference
+    final MediaQueryData ambientMedia = MediaQuery.maybeOf(context) ??
+        MediaQueryData.fromView(View.of(context));
+
     final Brightness effectiveBrightness = settings.darkMode != null
         ? (settings.darkMode! ? Brightness.dark : Brightness.light)
-        : Theme.of(context).brightness;
+        : ambientMedia.platformBrightness;
 
     final bool isDark = effectiveBrightness == Brightness.dark;
 
-    final Color effectivePanelBg = scope.theme?.panelBackgroundColor ??
-        (isDark ? const Color(0xFF1E1E1E) : Colors.white);
-    final Color effectivePanelHeader = scope.theme?.panelHeaderColor ??
-        (isDark ? const Color(0xFF282828) : const Color(0xFFF5F6FA));
-    final Color effectiveCardBg = scope.theme?.cardBackgroundColor ??
-        (isDark ? const Color(0xFF2C2C2C) : const Color(0xFFEEF0F6));
-    final Color effectiveAccent = scope.theme?.accentColor ??
-        (isDark ? Colors.indigoAccent : Colors.indigo);
-
-    final ColorScheme colorScheme = ColorScheme.fromSeed(
-      seedColor: effectiveAccent,
-      brightness: effectiveBrightness,
-    );
-
-    final ThemeData dynamicTheme = (isDark
-            ? ThemeData.dark(useMaterial3: true)
-            : ThemeData.light(useMaterial3: true))
+    final ThemeData baselineTheme = (isDark
+            ? ThemeData.dark(useMaterial3: ambientTheme.useMaterial3)
+            : ThemeData.light(useMaterial3: ambientTheme.useMaterial3))
         .copyWith(
-      colorScheme: colorScheme,
-      scaffoldBackgroundColor: effectivePanelBg,
-      cardColor: effectiveCardBg,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: ambientTheme.colorScheme.primary,
+        brightness: effectiveBrightness,
+      ),
     );
 
-    final AccessibilityWidgetTheme resolvedTheme =
-        (scope.theme ?? const AccessibilityWidgetTheme()).copyWith(
-      panelBackgroundColor: effectivePanelBg,
-      panelHeaderColor: effectivePanelHeader,
-      cardBackgroundColor: effectiveCardBg,
-      accentColor: effectiveAccent,
-      fabBackgroundColor:
-          scope.theme?.fabBackgroundColor ?? colorScheme.primary,
-      fabForegroundColor:
-          scope.theme?.fabForegroundColor ?? colorScheme.onPrimary,
+    ColorScheme effectiveColorScheme = baselineTheme.colorScheme;
+    if (settings.highContrast) {
+      effectiveColorScheme = isDark
+          ? ColorScheme.highContrastDark().copyWith(
+              primary: const Color(0xFFFFD600),
+              onPrimary: Colors.black,
+              secondary: const Color(0xFF00E5FF),
+              onSecondary: Colors.black,
+              surface: Colors.black,
+              onSurface: Colors.white,
+              outline: Colors.white,
+            )
+          : ColorScheme.highContrastLight().copyWith(
+              primary: const Color(0xFF002B7F),
+              onPrimary: Colors.white,
+              secondary: const Color(0xFF004D40),
+              onSecondary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+              outline: Colors.black,
+            );
+    } else if (settings.darkMode == null &&
+        ambientTheme.brightness == effectiveBrightness) {
+      effectiveColorScheme = ambientTheme.colorScheme;
+    }
+
+    final TextTheme baseTextTheme = (settings.darkMode != null &&
+            settings.darkMode != (ambientTheme.brightness == Brightness.dark))
+        ? baselineTheme.textTheme
+        : ambientTheme.textTheme;
+
+    final ThemeData dynamicTheme = ambientTheme.copyWith(
+      brightness: effectiveBrightness,
+      colorScheme: effectiveColorScheme,
+      textTheme: baseTextTheme,
+      scaffoldBackgroundColor:
+          isDark ? const Color(0xFF121212) : const Color(0xFFFAFAFA),
     );
+
+    final ColorScheme colorScheme = dynamicTheme.colorScheme;
+    final Color panelBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final Color headerBg =
+        isDark ? const Color(0xFF282828) : const Color(0xFFF5F6FA);
 
     Widget buildPanelBody() {
       return Theme(
@@ -129,7 +163,7 @@ class AccessibilityBottomSheet extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               decoration: BoxDecoration(
-                color: resolvedTheme.panelHeaderColor,
+                color: headerBg,
                 borderRadius: isPopup
                     ? null
                     : const BorderRadius.vertical(top: Radius.circular(20.0)),
@@ -143,7 +177,7 @@ class AccessibilityBottomSheet extends StatelessWidget {
                         height: 4,
                         margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
-                          color: dynamicTheme.dividerColor,
+                          color: isDark ? Colors.white30 : Colors.black26,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -153,22 +187,22 @@ class AccessibilityBottomSheet extends StatelessWidget {
                     children: <Widget>[
                       Row(
                         children: <Widget>[
-                          Icon(resolvedTheme.fabIcon,
-                              color: resolvedTheme.accentColor, size: 22),
+                          Icon(Icons.accessibility_new,
+                              color: colorScheme.primary, size: 22),
                           const SizedBox(width: 8),
                           Text(
                             'Accessibility',
-                            style: resolvedTheme.titleStyle ??
-                                TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: dynamicTheme.colorScheme.onSurface,
-                                ),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
                           ),
                         ],
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),
+                        color: colorScheme.onSurface,
                         tooltip: 'Close',
                         onPressed: () => Navigator.of(context).pop(),
                       ),
@@ -191,7 +225,7 @@ class AccessibilityBottomSheet extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               decoration: BoxDecoration(
-                color: resolvedTheme.panelHeaderColor,
+                color: headerBg,
                 border: Border(
                   top: BorderSide(
                     color: dynamicTheme.dividerColor.withValues(alpha: 0.3),
@@ -231,7 +265,7 @@ class AccessibilityBottomSheet extends StatelessWidget {
             maxWidth: MediaQuery.sizeOf(context).width - 32,
           ),
           decoration: BoxDecoration(
-            color: resolvedTheme.panelBackgroundColor,
+            color: panelBg,
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: const <BoxShadow>[
               BoxShadow(
@@ -255,7 +289,7 @@ class AccessibilityBottomSheet extends StatelessWidget {
           ScrollController scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: resolvedTheme.panelBackgroundColor,
+            color: panelBg,
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(20.0)),
             boxShadow: const <BoxShadow>[

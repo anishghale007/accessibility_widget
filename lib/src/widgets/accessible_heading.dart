@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/accessibility_widget_theme.dart';
 import 'accessibility_scope.dart';
 
 /// An accessible heading wrapper widget that provides unconditional screen-reader heading
@@ -20,7 +19,7 @@ class AccessibleHeading extends StatelessWidget {
   /// Heading hierarchy level (1 to 6, where 1 is the most prominent).
   final int level;
 
-  /// Custom highlight color. Defaults to theme accent color or primary color.
+  /// Custom highlight color. Defaults to theme primary color.
   final Color? highlightColor;
 
   /// Whether to render a left accent bar next to the heading when highlighted.
@@ -40,9 +39,7 @@ class AccessibleHeading extends StatelessWidget {
     }
 
     final ThemeData theme = Theme.of(context);
-    final AccessibilityWidgetTheme? widgetTheme = scope?.theme;
-    final Color effectiveColor =
-        highlightColor ?? widgetTheme?.accentColor ?? theme.colorScheme.primary;
+    final Color effectiveColor = highlightColor ?? theme.colorScheme.primary;
 
     // Scale styling according to heading level (h1 is thicker and larger than h6)
     final double barWidth = (7 - level) * 0.8;

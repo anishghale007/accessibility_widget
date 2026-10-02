@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../controller/accessibility_controller.dart';
 import '../models/accessibility_settings.dart';
-import '../theme/accessibility_widget_theme.dart';
-import 'accessibility_bottom_sheet.dart';
 import 'accessibility_scope.dart';
 import 'big_cursor_overlay.dart';
 import 'reading_guide_overlay.dart';
@@ -15,79 +13,29 @@ import 'reading_guide_overlay.dart';
 class AccessibilityWidget extends StatefulWidget {
   const AccessibilityWidget({
     required this.child,
-    this.fabAlignment = Alignment.bottomRight,
-    this.fabMargin = const EdgeInsets.all(16.0),
-    this.showFloatingActionButton = true,
-    this.controller,
-    this.theme,
-    this.fabIcon,
     super.key,
   });
 
   /// The child application widget tree.
   final Widget child;
 
-  /// Optional accessibility controller. If not provided, a default one is instantiated.
-  final AccessibilityController? controller;
-
-  /// Optional theme configuration for the accessibility UI.
-  final AccessibilityWidgetTheme? theme;
-
-  /// Whether to display the floating accessibility preferences button.
-  final bool showFloatingActionButton;
-
-  /// Optional icon for the floating button. Overrides theme default if specified.
-  final IconData? fabIcon;
-
-  /// Screen alignment for the floating button.
-  final Alignment fabAlignment;
-
-  /// Padding / margin around the floating button.
-  final EdgeInsets fabMargin;
-
   @override
   State<AccessibilityWidget> createState() => _AccessibilityWidgetState();
 }
 
 class _AccessibilityWidgetState extends State<AccessibilityWidget> {
-  late AccessibilityController _controller;
-  bool _isInternalController = false;
+  late final AccessibilityController _controller;
 
   @override
   void initState() {
     super.initState();
-    if (widget.controller != null) {
-      _controller = widget.controller!;
-    } else {
-      _controller = AccessibilityController();
-      _isInternalController = true;
-      _controller.restore();
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant AccessibilityWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
-      if (_isInternalController) {
-        _controller.dispose();
-      }
-      if (widget.controller != null) {
-        _controller = widget.controller!;
-        _isInternalController = false;
-      } else {
-        _controller = AccessibilityController();
-        _isInternalController = true;
-        _controller.restore();
-      }
-    }
+    _controller = AccessibilityController();
+    _controller.restore();
   }
 
   @override
   void dispose() {
-    if (_isInternalController) {
-      _controller.dispose();
-    }
+    _controller.dispose();
     super.dispose();
   }
 
@@ -95,14 +43,11 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
   Widget build(BuildContext context) {
     return AccessibilityScope(
       controller: _controller,
-      theme: widget.theme,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (BuildContext context, _) {
           final AccessibilitySettings settings = _controller.settings;
-          final AccessibilityWidgetTheme resolvedTheme =
-              widget.theme?.resolveWith(context) ??
-                  const AccessibilityWidgetTheme().resolveWith(context);
+          final ThemeData ambientTheme = Theme.of(context);
 
           Widget content = widget.child;
 
@@ -112,8 +57,9 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
             letterSpacing:
                 settings.letterSpacing != 0.0 ? settings.letterSpacing : null,
             height: settings.lineSpacing != 1.0 ? settings.lineSpacing : null,
-            fontFamily:
-                settings.dyslexiaFont ? 'packages/accessibility_widget/Andika' : null,
+            fontFamily: settings.dyslexiaFont
+                ? 'packages/accessibility_widget/Andika'
+                : null,
             fontFamilyFallback: settings.dyslexiaFont
                 ? const <String>[
                     'packages/accessibility_widget/Andika',
@@ -203,7 +149,7 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
           // 4. Platform Overlays: Reading Guide & Big Cursor
           if (settings.readingGuide) {
             content = ReadingGuideOverlay(
-              guideColor: resolvedTheme.accentColor,
+              guideColor: ambientTheme.colorScheme.primary,
               child: content,
             );
           }
@@ -215,7 +161,6 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
           }
 
           // 5. Theme & Typography injection
-          final ThemeData ambientTheme = Theme.of(context);
           final MediaQueryData ambientMedia = MediaQuery.maybeOf(context) ??
               MediaQueryData.fromView(View.of(context));
 
@@ -264,7 +209,8 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
 
           // Use the textTheme of the matching brightness to ensure text colors are never inverted
           final TextTheme baseTextTheme = (settings.darkMode != null &&
-                  settings.darkMode != (ambientTheme.brightness == Brightness.dark))
+                  settings.darkMode !=
+                      (ambientTheme.brightness == Brightness.dark))
               ? baselineTheme.textTheme
               : ambientTheme.textTheme;
 
@@ -326,7 +272,9 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
             scaffoldBackgroundColor: settings.highContrast
                 ? (isDark ? Colors.black : Colors.white)
                 : (settings.darkMode != null
-                    ? (isDark ? const Color(0xFF121212) : const Color(0xFFFAFAFA))
+                    ? (isDark
+                        ? const Color(0xFF121212)
+                        : const Color(0xFFFAFAFA))
                     : ambientTheme.scaffoldBackgroundColor),
             cardTheme: settings.highContrast
                 ? ambientTheme.cardTheme.copyWith(
@@ -366,39 +314,6 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
             data: modifiedMedia,
             child: content,
           );
-
-          // 5. Floating Action Button Entry Point
-          if (widget.showFloatingActionButton) {
-            final IconData effectiveFabIcon =
-                widget.fabIcon ?? resolvedTheme.fabIcon;
-
-            content = Stack(
-              children: <Widget>[
-                content,
-                SafeArea(
-                  child: Align(
-                    alignment: widget.fabAlignment,
-                    child: Padding(
-                      padding: widget.fabMargin,
-                      child: FloatingActionButton(
-                        heroTag: 'accessibility_widget_fab',
-                        shape: resolvedTheme.fabShape ?? const CircleBorder(),
-                        backgroundColor: resolvedTheme.fabBackgroundColor,
-                        foregroundColor: resolvedTheme.fabForegroundColor,
-                        tooltip: 'Accessibility preferences',
-                        onPressed: () => AccessibilityBottomSheet.show(
-                          context,
-                          alignment: widget.fabAlignment,
-                          margin: widget.fabMargin,
-                        ),
-                        child: Icon(effectiveFabIcon),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }
 
           return content;
         },

@@ -46,6 +46,44 @@ class AccessibleImage extends StatelessWidget {
       );
     }
 
-    return const SizedBox.shrink();
+    final ThemeData theme = Theme.of(context);
+    return Semantics(
+      container: true,
+      label: semanticLabel,
+      child: Container(
+        width: width,
+        height: height ?? 120,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: theme.dividerColor,
+            width: 1.0,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.image_not_supported_outlined,
+              size: 32,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 6),
+            ExcludeSemantics(
+              child: Text(
+                semanticLabel,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
