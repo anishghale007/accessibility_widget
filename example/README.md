@@ -116,7 +116,7 @@ AccessibilityFloatingActionButton(
 
 - ⚡ **Preset Profiles** — Live toggling between **Seizure Safe**, **Vision Impaired**, **ADHD Friendly**, and **Dyslexia Friendly** profiles.
 - 🔤 **Typography & Headings** — Testing font scaling, line height, letter spacing, bold text, and the bundled **Andika** dyslexia-friendly font alongside `AccessibleHeading` (levels 1–3).
-- 🖼️ **Image Hiding** — Demonstrating `AccessibleImage` with accessible placeholder replacement.
+- 🖼️ **Image Hiding** — Demonstrating `AccessibleImage` clean hiding when enabled.
 - 🔗 **Links & Haptics** — Demonstrating `AccessibleLink` with visual highlights and tactile feedback.
 - 🃏 **Cards & Boundaries** — Testing `AccessibleTile` border outlines.
 - ⏱️ **Motion Reduction** — Rotation animation demonstrating instant pausing via `MediaQuery.disableAnimations`.

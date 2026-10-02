@@ -183,11 +183,10 @@ AccessibleHeading(
 
 ### Accessible Images
 
-Replaces images with an accessible placeholder carrying a semantic label when the user enables "Hide Images":
+Hides images cleanly (or renders an optional custom `placeholder`) when the user enables "Hide Images":
 
 ```dart
 AccessibleImage(
-  semanticLabel: 'Mountain landscape at sunrise',
   child: Image.network('https://example.com/photo.jpg'),
 )
 ```
