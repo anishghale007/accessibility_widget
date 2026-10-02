@@ -46,13 +46,6 @@ class AccessibleImage extends StatelessWidget {
       );
     }
 
-    if (width != null || height != null) {
-      return SizedBox(
-        width: width,
-        height: height,
-      );
-    }
-
     return const SizedBox.shrink();
   }
 }
