@@ -26,7 +26,7 @@ void main() {
       expect(find.byIcon(Icons.image_not_supported_outlined), findsNothing);
     });
 
-    testWidgets('swaps to placeholder with semantics when hideImages is true', (WidgetTester tester) async {
+    testWidgets('hides image completely when hideImages is true and no placeholder is provided', (WidgetTester tester) async {
       final AccessibilityController controller = AccessibilityController(
         store: InMemoryAccessibilityStore(),
       );
@@ -50,8 +50,43 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Original Image'), findsNothing);
-      expect(find.byIcon(Icons.image_not_supported_outlined), findsOneWidget);
-      expect(find.bySemanticsLabel('Image hidden'), findsOneWidget);
+      expect(find.text('Image hidden'), findsNothing);
+      expect(find.byType(SizedBox), findsWidgets);
+    });
+
+    testWidgets('renders custom placeholder with semantics when provided', (WidgetTester tester) async {
+      final AccessibilityController controller = AccessibilityController(
+        store: InMemoryAccessibilityStore(),
+      );
+
+      await tester.pumpWidget(
+        AccessibilityScope(
+          controller: controller,
+          child: const MaterialApp(
+            home: Scaffold(
+              body: AccessibleImage(
+                placeholder: Text('Custom Placeholder'),
+                semanticLabel: 'Custom Alt Text',
+                child: Text('Original Image'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      controller.toggleHideImages();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Original Image'), findsNothing);
+      expect(find.text('Custom Placeholder'), findsOneWidget);
+
+      final Semantics semanticsWidget = tester.widget<Semantics>(
+        find.ancestor(
+          of: find.text('Custom Placeholder'),
+          matching: find.byType(Semantics),
+        ).first,
+      );
+      expect(semanticsWidget.properties.label, 'Custom Alt Text');
     });
   });
 }

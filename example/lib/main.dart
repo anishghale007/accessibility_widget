@@ -252,7 +252,7 @@ class _AccessibilityShowcaseScreenState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'When "Hide Images" is enabled in preferences, images are replaced with a high-contrast accessible placeholder with semantic labels:',
+                      'When "Hide Images" is enabled in preferences, images are hidden cleanly to reduce cognitive clutter and visual distractions:',
                       style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 12),

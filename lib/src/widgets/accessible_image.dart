@@ -3,8 +3,8 @@ import 'accessibility_scope.dart';
 
 /// An accessible image wrapper widget that respects the [AccessibilitySettings.hideImages] preference.
 ///
-/// When `hideImages` is enabled, this widget replaces the image with an accessible placeholder
-/// carrying a semantic label. When disabled, the child image renders normally.
+/// When `hideImages` is enabled, this widget hides the image (or renders an optional custom [placeholder]).
+/// When disabled, the child image renders normally.
 class AccessibleImage extends StatelessWidget {
   const AccessibleImage({
     required this.child,
@@ -18,16 +18,16 @@ class AccessibleImage extends StatelessWidget {
   /// The original image widget to render when images are visible.
   final Widget child;
 
-  /// Optional width for the placeholder when image is hidden.
+  /// Optional width when image is hidden.
   final double? width;
 
-  /// Optional height for the placeholder when image is hidden.
+  /// Optional height when image is hidden.
   final double? height;
 
   /// Optional custom placeholder widget.
   final Widget? placeholder;
 
-  /// Accessibility semantic label announced by screen readers when the image is hidden.
+  /// Accessibility semantic label announced by screen readers when a custom placeholder is used.
   final String semanticLabel;
 
   @override
@@ -46,44 +46,13 @@ class AccessibleImage extends StatelessWidget {
       );
     }
 
-    final ThemeData theme = Theme.of(context);
-    return Semantics(
-      container: true,
-      label: semanticLabel,
-      child: Container(
+    if (width != null || height != null) {
+      return SizedBox(
         width: width,
-        height: height ?? 120,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: theme.dividerColor,
-            width: 1.0,
-          ),
-        ),
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              Icons.image_not_supported_outlined,
-              size: 32,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 6),
-            ExcludeSemantics(
-              child: Text(
-                semanticLabel,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+        height: height,
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }
