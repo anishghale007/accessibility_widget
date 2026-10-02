@@ -37,7 +37,7 @@ void main() {
     expect(find.byType(AccessibilityFloatingActionButton), findsOneWidget);
 
     // Tap the FAB
-    await tester.tap(find.byType(AccessibilityFloatingActionButton));
+    await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
     expect(find.text('Accessibility'), findsOneWidget);
