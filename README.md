@@ -98,20 +98,21 @@ Scaffold(
 ```
 
 ### Customizing the FAB Icon & Style
+
 You can customize the FAB's icon, colors, and shape via constructor properties:
 
 ```dart
 AccessibilityFloatingActionButton(
   // Customize the icon (defaults to Icons.accessibility_new)
   icon: Icons.accessibility,
-  
+
   // Custom colors (defaults to theme's colorScheme.primary / onPrimary)
   backgroundColor: Colors.deepPurple,
   foregroundColor: Colors.white,
-  
+
   // Custom tooltip
   tooltip: 'Open accessibility controls',
-  
+
   // Custom shape
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
 )
@@ -124,6 +125,7 @@ AccessibilityFloatingActionButton(
 You can trigger the accessibility preferences through multiple UI entry points:
 
 ### 1. Modal Bottom Sheet / Anchored Web Popup
+
 Open the modal preferences sheet programmatically from any button, menu, or app bar action:
 
 ```dart
@@ -131,6 +133,7 @@ AccessibilityBottomSheet.show(context);
 ```
 
 ### 2. Dedicated Settings Page (`AccessibilitySettingsPage`)
+
 Push the full-screen settings page from your existing settings menu or drawer:
 
 ```dart
@@ -143,6 +146,7 @@ Navigator.push(
 ```
 
 ### 3. Controller & Scope
+
 Access the current settings or manipulate them programmatically from anywhere in the widget tree:
 
 ```dart
@@ -249,6 +253,7 @@ The package includes four styles (Regular, Bold, Italic, and Bold-Italic), which
 ## Acknowledgements & Inspirations
 
 This package was created with great inspiration from:
+
 - [Accessible Web Demo](https://accessibleweb.pages.dev/)
 - [accessibility Flutter package](https://pub.dev/packages/accessibility)
 
