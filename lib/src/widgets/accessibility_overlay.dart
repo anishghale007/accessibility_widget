@@ -166,7 +166,7 @@ class _AccessibilityWidgetState extends State<AccessibilityWidget> {
 
           final Brightness effectiveBrightness = settings.darkMode != null
               ? (settings.darkMode! ? Brightness.dark : Brightness.light)
-              : ambientMedia.platformBrightness;
+              : ambientTheme.brightness;
 
           final bool isDark = effectiveBrightness == Brightness.dark;
 

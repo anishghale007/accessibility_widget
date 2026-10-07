@@ -182,56 +182,65 @@ class AccessibilityController extends ChangeNotifier {
     ));
   }
 
-  /// Atomically applies a preset profile bundle of settings.
+  /// Atomically toggles a preset profile on or off and merges all active profiles.
   ///
-  /// If the specified [profile] is already active, calling this disables it
-  /// and resets all settings back to default values.
-  void applyProfile(AccessibilityProfile profile) {
-    if (_settings.activeProfile == profile) {
-      reset();
-      return;
+  /// Multiple profiles can be active simultaneously (e.g. Seizure Safe + Dyslexia Friendly).
+  void toggleProfile(AccessibilityProfile profile) {
+    final Set<AccessibilityProfile> nextProfiles =
+        Set<AccessibilityProfile>.from(_settings.activeProfiles);
+    if (nextProfiles.contains(profile)) {
+      nextProfiles.remove(profile);
+    } else {
+      nextProfiles.add(profile);
     }
 
-    switch (profile) {
-      case AccessibilityProfile.seizureSafe:
-        update(AccessibilitySettings.defaults.copyWith(
-          stopAnimations: true,
-          saturation: 0.5,
-          invertColors: false,
-          highContrast: false,
-          activeProfile: AccessibilityProfile.seizureSafe,
-        ));
-        break;
-      case AccessibilityProfile.visionImpaired:
-        update(AccessibilitySettings.defaults.copyWith(
-          textScale: 1.5,
-          highContrast: true,
-          boldText: true,
-          highlightLinks: true,
-          highlightTiles: true,
-          highlightHeadings: true,
-          bigCursor: true,
-          activeProfile: AccessibilityProfile.visionImpaired,
-        ));
-        break;
-      case AccessibilityProfile.adhd:
-        update(AccessibilitySettings.defaults.copyWith(
-          readingGuide: true,
-          stopAnimations: true,
-          activeProfile: AccessibilityProfile.adhd,
-        ));
-        break;
-      case AccessibilityProfile.dyslexia:
-        update(AccessibilitySettings.defaults.copyWith(
-          dyslexiaFont: true,
-          lineSpacing: 1.5,
-          letterSpacing: 1.2,
-          stopAnimations: true,
-          activeProfile: AccessibilityProfile.dyslexia,
-        ));
-        break;
+    AccessibilitySettings computed = AccessibilitySettings.defaults.copyWith(
+      activeProfiles: nextProfiles,
+      darkMode: _settings.darkMode,
+      hapticFeedback: _settings.hapticFeedback,
+    );
+
+    for (final AccessibilityProfile p in nextProfiles) {
+      switch (p) {
+        case AccessibilityProfile.seizureSafe:
+          computed = computed.copyWith(
+            stopAnimations: true,
+            saturation: 0.5,
+          );
+          break;
+        case AccessibilityProfile.visionImpaired:
+          computed = computed.copyWith(
+            textScale: 1.5,
+            highContrast: true,
+            boldText: true,
+            highlightLinks: true,
+            highlightTiles: true,
+            highlightHeadings: true,
+            bigCursor: true,
+          );
+          break;
+        case AccessibilityProfile.adhd:
+          computed = computed.copyWith(
+            readingGuide: true,
+            stopAnimations: true,
+          );
+          break;
+        case AccessibilityProfile.dyslexia:
+          computed = computed.copyWith(
+            dyslexiaFont: true,
+            lineSpacing: 1.5,
+            letterSpacing: 1.2,
+            stopAnimations: true,
+          );
+          break;
+      }
     }
+
+    update(computed);
   }
+
+  /// Toggles or applies a preset profile bundle of settings.
+  void applyProfile(AccessibilityProfile profile) => toggleProfile(profile);
 
   /// Resets all settings back to default baseline values and clears active profile.
   void reset() {

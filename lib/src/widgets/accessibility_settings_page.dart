@@ -24,12 +24,9 @@ class AccessibilitySettingsPage extends StatelessWidget {
     Widget buildPage(AccessibilityScope scope, BuildContext pageContext) {
       final AccessibilitySettings settings = scope.settings;
       final ThemeData ambientTheme = Theme.of(pageContext);
-      final MediaQueryData ambientMedia = MediaQuery.maybeOf(pageContext) ??
-          MediaQueryData.fromView(View.of(pageContext));
-
       final Brightness effectiveBrightness = settings.darkMode != null
           ? (settings.darkMode! ? Brightness.dark : Brightness.light)
-          : ambientMedia.platformBrightness;
+          : ambientTheme.brightness;
 
       final bool isDark = effectiveBrightness == Brightness.dark;
 

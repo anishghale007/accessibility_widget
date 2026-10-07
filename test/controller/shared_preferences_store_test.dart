@@ -19,7 +19,7 @@ void main() {
       const AccessibilitySettings toSave = AccessibilitySettings(
         textScale: 1.4,
         highContrast: true,
-        activeProfile: AccessibilityProfile.seizureSafe,
+        activeProfiles: <AccessibilityProfile>{AccessibilityProfile.seizureSafe},
       );
 
       await store.write(toSave);

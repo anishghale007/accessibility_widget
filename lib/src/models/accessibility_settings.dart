@@ -10,13 +10,27 @@ class AccessibilitySettings {
       return defaults;
     }
 
-    AccessibilityProfile? profile;
-    final dynamic rawProfile = json['activeProfile'];
-    if (rawProfile is String) {
-      for (final AccessibilityProfile p in AccessibilityProfile.values) {
-        if (p.name == rawProfile) {
-          profile = p;
-          break;
+    final Set<AccessibilityProfile> profiles = <AccessibilityProfile>{};
+    final dynamic rawProfiles = json['activeProfiles'];
+    if (rawProfiles is List) {
+      for (final dynamic item in rawProfiles) {
+        if (item is String) {
+          for (final AccessibilityProfile p in AccessibilityProfile.values) {
+            if (p.name == item) {
+              profiles.add(p);
+              break;
+            }
+          }
+        }
+      }
+    } else {
+      final dynamic rawProfile = json['activeProfile'];
+      if (rawProfile is String) {
+        for (final AccessibilityProfile p in AccessibilityProfile.values) {
+          if (p.name == rawProfile) {
+            profiles.add(p);
+            break;
+          }
         }
       }
     }
@@ -39,7 +53,7 @@ class AccessibilitySettings {
       bigCursor: json['bigCursor'] as bool? ?? false,
       stopAnimations: json['stopAnimations'] as bool? ?? false,
       hapticFeedback: json['hapticFeedback'] as bool? ?? false,
-      activeProfile: profile,
+      activeProfiles: profiles,
     );
   }
   const AccessibilitySettings({
@@ -60,7 +74,7 @@ class AccessibilitySettings {
     this.bigCursor = false,
     this.stopAnimations = false,
     this.hapticFeedback = false,
-    this.activeProfile,
+    this.activeProfiles = const <AccessibilityProfile>{},
   });
 
   /// The text scale factor multiplier (e.g. 1.0 to 2.0).
@@ -114,8 +128,16 @@ class AccessibilitySettings {
   /// Whether tactile/vibrational feedback should trigger on interactive element taps.
   final bool hapticFeedback;
 
-  /// Currently active preset profile, or null if custom/no profile is active.
-  final AccessibilityProfile? activeProfile;
+  /// Currently active preset profiles, or empty if custom/no profile is active.
+  final Set<AccessibilityProfile> activeProfiles;
+
+  /// Primary active profile for backwards compatibility, or null if none active.
+  AccessibilityProfile? get activeProfile =>
+      activeProfiles.isNotEmpty ? activeProfiles.first : null;
+
+  /// Returns whether a specific [profile] is currently enabled.
+  bool isProfileActive(AccessibilityProfile profile) =>
+      activeProfiles.contains(profile);
 
   /// Default baseline settings with no accessibility adjustments applied.
   static const AccessibilitySettings defaults = AccessibilitySettings();
@@ -140,9 +162,20 @@ class AccessibilitySettings {
     bool? bigCursor,
     bool? stopAnimations,
     bool? hapticFeedback,
+    Set<AccessibilityProfile>? activeProfiles,
     AccessibilityProfile? activeProfile,
     bool clearActiveProfile = false,
+    bool clearActiveProfiles = false,
   }) {
+    Set<AccessibilityProfile> effectiveProfiles = this.activeProfiles;
+    if (clearActiveProfiles || clearActiveProfile) {
+      effectiveProfiles = const <AccessibilityProfile>{};
+    } else if (activeProfiles != null) {
+      effectiveProfiles = activeProfiles;
+    } else if (activeProfile != null) {
+      effectiveProfiles = <AccessibilityProfile>{activeProfile};
+    }
+
     return AccessibilitySettings(
       textScale: textScale ?? this.textScale,
       boldText: boldText ?? this.boldText,
@@ -161,8 +194,7 @@ class AccessibilitySettings {
       bigCursor: bigCursor ?? this.bigCursor,
       stopAnimations: stopAnimations ?? this.stopAnimations,
       hapticFeedback: hapticFeedback ?? this.hapticFeedback,
-      activeProfile:
-          clearActiveProfile ? null : (activeProfile ?? this.activeProfile),
+      activeProfiles: effectiveProfiles,
     );
   }
 
@@ -186,6 +218,7 @@ class AccessibilitySettings {
       'bigCursor': bigCursor,
       'stopAnimations': stopAnimations,
       'hapticFeedback': hapticFeedback,
+      'activeProfiles': activeProfiles.map((p) => p.name).toList(),
       'activeProfile': activeProfile?.name,
     };
   }
@@ -211,7 +244,7 @@ class AccessibilitySettings {
         other.bigCursor == bigCursor &&
         other.stopAnimations == stopAnimations &&
         other.hapticFeedback == hapticFeedback &&
-        other.activeProfile == activeProfile;
+        setEquals(other.activeProfiles, activeProfiles);
   }
 
   @override
@@ -233,7 +266,7 @@ class AccessibilitySettings {
         bigCursor,
         stopAnimations,
         hapticFeedback,
-        activeProfile,
+        Object.hashAll(activeProfiles),
       ]);
 
   @override

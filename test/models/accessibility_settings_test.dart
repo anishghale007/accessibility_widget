@@ -44,16 +44,27 @@ void main() {
         bigCursor: true,
         stopAnimations: true,
         hapticFeedback: true,
-        activeProfile: AccessibilityProfile.visionImpaired,
+        activeProfiles: <AccessibilityProfile>{
+          AccessibilityProfile.visionImpaired,
+          AccessibilityProfile.dyslexia,
+        },
       );
 
       final Map<String, dynamic> json = original.toJson();
       expect(json['textScale'], 1.5);
-      expect(json['activeProfile'], 'visionImpaired');
+      expect(json['activeProfiles'], <String>['visionImpaired', 'dyslexia']);
 
-      final AccessibilitySettings restored = AccessibilitySettings.fromJson(json);
+      final AccessibilitySettings restored =
+          AccessibilitySettings.fromJson(json);
       expect(restored, equals(original));
-      expect(restored.activeProfile, AccessibilityProfile.visionImpaired);
+      expect(
+        restored.isProfileActive(AccessibilityProfile.visionImpaired),
+        isTrue,
+      );
+      expect(
+        restored.isProfileActive(AccessibilityProfile.dyslexia),
+        isTrue,
+      );
     });
 
     test('fromJson handles legacy / missing fields gracefully', () {
@@ -62,29 +73,30 @@ void main() {
         'boldText': true,
       };
 
-      final AccessibilitySettings restored = AccessibilitySettings.fromJson(legacyJson);
+      final AccessibilitySettings restored =
+          AccessibilitySettings.fromJson(legacyJson);
       expect(restored.textScale, 1.2);
       expect(restored.boldText, isTrue);
       expect(restored.highlightTiles, isFalse);
       expect(restored.bigCursor, isFalse);
       expect(restored.hapticFeedback, isFalse);
-      expect(restored.activeProfile, isNull);
+      expect(restored.activeProfiles, isEmpty);
     });
 
     test('copyWith works and supports clearing nullable fields', () {
       const AccessibilitySettings settings = AccessibilitySettings(
         darkMode: true,
-        activeProfile: AccessibilityProfile.seizureSafe,
+        activeProfiles: <AccessibilityProfile>{AccessibilityProfile.seizureSafe},
       );
 
       final AccessibilitySettings updated = settings.copyWith(
         clearDarkMode: true,
-        clearActiveProfile: true,
+        clearActiveProfiles: true,
         textScale: 1.3,
       );
 
       expect(updated.darkMode, isNull);
-      expect(updated.activeProfile, isNull);
+      expect(updated.activeProfiles, isEmpty);
       expect(updated.textScale, 1.3);
     });
   });
