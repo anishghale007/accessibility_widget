@@ -260,9 +260,9 @@ class AccessibilityPanelContent extends StatelessWidget {
                 description: AccessibilityProfile.seizureSafe.description,
                 icon: Icons.shield_outlined,
                 isSelected:
-                    settings.activeProfile == AccessibilityProfile.seizureSafe,
+                    settings.isProfileActive(AccessibilityProfile.seizureSafe),
                 onTap: () =>
-                    controller.applyProfile(AccessibilityProfile.seizureSafe),
+                    controller.toggleProfile(AccessibilityProfile.seizureSafe),
               ),
             ),
             const SizedBox(width: 12),
@@ -272,10 +272,10 @@ class AccessibilityPanelContent extends StatelessWidget {
                 title: AccessibilityProfile.visionImpaired.label,
                 description: AccessibilityProfile.visionImpaired.description,
                 icon: Icons.visibility_outlined,
-                isSelected: settings.activeProfile ==
-                    AccessibilityProfile.visionImpaired,
+                isSelected: settings
+                    .isProfileActive(AccessibilityProfile.visionImpaired),
                 onTap: () => controller
-                    .applyProfile(AccessibilityProfile.visionImpaired),
+                    .toggleProfile(AccessibilityProfile.visionImpaired),
               ),
             ),
           ],
@@ -289,8 +289,10 @@ class AccessibilityPanelContent extends StatelessWidget {
                 title: AccessibilityProfile.adhd.label,
                 description: AccessibilityProfile.adhd.description,
                 icon: Icons.center_focus_strong_outlined,
-                isSelected: settings.activeProfile == AccessibilityProfile.adhd,
-                onTap: () => controller.applyProfile(AccessibilityProfile.adhd),
+                isSelected:
+                    settings.isProfileActive(AccessibilityProfile.adhd),
+                onTap: () =>
+                    controller.toggleProfile(AccessibilityProfile.adhd),
               ),
             ),
             const SizedBox(width: 12),
@@ -301,9 +303,9 @@ class AccessibilityPanelContent extends StatelessWidget {
                 description: AccessibilityProfile.dyslexia.description,
                 icon: Icons.spellcheck_outlined,
                 isSelected:
-                    settings.activeProfile == AccessibilityProfile.dyslexia,
+                    settings.isProfileActive(AccessibilityProfile.dyslexia),
                 onTap: () =>
-                    controller.applyProfile(AccessibilityProfile.dyslexia),
+                    controller.toggleProfile(AccessibilityProfile.dyslexia),
               ),
             ),
           ],

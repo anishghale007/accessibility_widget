@@ -25,9 +25,7 @@ class AccessibilityDemoApp extends StatelessWidget {
         colorSchemeSeed: Colors.indigo,
         brightness: Brightness.dark,
       ),
-      home: const AccessibilityWidget(
-        child: AccessibilityShowcaseScreen(),
-      ),
+      home: const AccessibilityWidget(child: AccessibilityShowcaseScreen()),
     );
   }
 }
@@ -77,7 +75,6 @@ class _AccessibilityShowcaseScreenState
     final AccessibilitySettings settings = scope.settings;
     final AccessibilityController controller = scope.controller;
     final ThemeData theme = Theme.of(context);
-    final bool animationsDisabled = MediaQuery.of(context).disableAnimations;
 
     return Scaffold(
       appBar: AppBar(
@@ -148,7 +145,7 @@ class _AccessibilityShowcaseScreenState
                       runSpacing: 8,
                       children: AccessibilityProfile.values.map((profile) {
                         final bool isSelected =
-                            settings.activeProfile == profile;
+                            settings.isProfileActive(profile);
                         final IconData icon;
                         switch (profile) {
                           case AccessibilityProfile.seizureSafe:
@@ -164,18 +161,43 @@ class _AccessibilityShowcaseScreenState
                             icon = Icons.spellcheck;
                             break;
                         }
+
+                        final Color textColor = isSelected
+                            ? theme.colorScheme.onPrimaryContainer
+                            : theme.colorScheme.onSurface;
+                        final Color iconColor = isSelected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant;
+                        final BorderSide chipBorder = BorderSide(
+                          color: isSelected
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.outline.withValues(alpha: 0.3),
+                          width: isSelected ? 1.5 : 1.0,
+                        );
+
                         return ChoiceChip(
-                          avatar: Icon(icon, size: 18),
+                          avatar: Icon(
+                            icon,
+                            size: 18,
+                            color: iconColor,
+                          ),
                           label: Text(
                             profile.label,
                             style: TextStyle(
-                              color: theme.colorScheme.onPrimaryContainer,
+                              color: textColor,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
                             ),
                           ),
                           selected: isSelected,
+                          backgroundColor: theme.colorScheme.surface,
+                          selectedColor: theme.colorScheme.primaryContainer,
+                          side: chipBorder,
+                          showCheckmark: false,
                           onSelected: (_) {
                             final bool wasSelected = isSelected;
-                            controller.applyProfile(profile);
+                            controller.toggleProfile(profile);
                             if (wasSelected) {
                               _showMessage(
                                 'Disabled "${profile.label}" profile',
@@ -372,46 +394,51 @@ class _AccessibilityShowcaseScreenState
                       style: theme.textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: <Widget>[
-                        AnimatedBuilder(
-                          animation: _animController,
-                          builder: (context, child) {
-                            final double angle = animationsDisabled
-                                ? 0.0
-                                : _animController.value * 2 * 3.14159;
-                            return Transform.rotate(
-                              angle: angle,
-                              child: Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(
-                                  Icons.sync,
-                                  color: theme.colorScheme.onPrimary,
+                    AccessibleAnimation.builder(
+                      controller: _animController,
+                      builder: (context, isAnimating, child) {
+                        return Row(
+                          children: <Widget>[
+                            AnimatedBuilder(
+                              animation: _animController,
+                              builder: (context, child) {
+                                final double angle = isAnimating
+                                    ? _animController.value * 2 * 3.14159
+                                    : 0.0;
+                                return Transform.rotate(
+                                  angle: angle,
+                                  child: Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      Icons.sync,
+                                      color: theme.colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                isAnimating
+                                    ? 'Status: Animations RUNNING smoothly'
+                                    : 'Status: Animations PAUSED (Reduce Motion active)',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: isAnimating
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.error,
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            animationsDisabled
-                                ? 'Status: Animations PAUSED (Reduce Motion active)'
-                                : 'Status: Animations RUNNING smoothly',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: animationsDisabled
-                                  ? theme.colorScheme.error
-                                  : theme.colorScheme.primary,
                             ),
-                          ),
-                        ),
-                      ],
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -479,9 +506,14 @@ class _AccessibilityShowcaseScreenState
     if (settings.boldText) activeFeatures.add('Bold Text');
     if (settings.stopAnimations) activeFeatures.add('Reduced Motion');
 
-    final String profileLabel =
-        settings.activeProfile?.label ??
-        (activeFeatures.isEmpty ? 'Default (Standard)' : 'Custom Settings');
+    final String profileLabel;
+    if (settings.activeProfiles.isNotEmpty) {
+      profileLabel = settings.activeProfiles.map((p) => p.label).join(' + ');
+    } else if (activeFeatures.isEmpty) {
+      profileLabel = 'Default (Standard)';
+    } else {
+      profileLabel = 'Custom Settings';
+    }
 
     return Container(
       padding: const EdgeInsets.all(14.0),

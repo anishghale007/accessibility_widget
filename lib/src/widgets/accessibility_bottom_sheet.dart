@@ -90,12 +90,9 @@ class AccessibilityBottomSheet extends StatelessWidget {
     final AccessibilitySettings settings = scope.settings;
     final ThemeData ambientTheme = Theme.of(context);
 
-    final MediaQueryData ambientMedia = MediaQuery.maybeOf(context) ??
-        MediaQueryData.fromView(View.of(context));
-
     final Brightness effectiveBrightness = settings.darkMode != null
         ? (settings.darkMode! ? Brightness.dark : Brightness.light)
-        : ambientMedia.platformBrightness;
+        : ambientTheme.brightness;
 
     final bool isDark = effectiveBrightness == Brightness.dark;
 
