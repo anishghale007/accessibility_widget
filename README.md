@@ -47,7 +47,7 @@ Add `accessibility_widget` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  accessibility_widget: ^0.0.1
+  accessibility_widget: ^0.0.2
 ```
 
 Import the package in your Dart code:
